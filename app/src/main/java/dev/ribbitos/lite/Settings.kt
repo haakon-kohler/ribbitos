@@ -15,6 +15,9 @@ data class Settings(
     /** True once [baseUrl] is a usable http(s) URL. */
     val configured: Boolean get() = baseUrl.trim().toHttpUrlOrNull() != null
 
+    /** True for `http://demo/v1`: replies come from [DemoBackend], no server needed. */
+    val demo: Boolean get() = baseUrl.trim().toHttpUrlOrNull()?.host == DemoBackend.HOST
+
     /** Saves trimmed values; a blank agent falls back to [DEFAULT_AGENT]. */
     fun save(ctx: Context) {
         prefs(ctx).edit()

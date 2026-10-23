@@ -28,7 +28,11 @@ interface Backend {
 object Wiring {
     /** Builds the backend for each turn from the current [Settings]. Replace to change backends. */
     @Volatile
-    var backendFactory: (Settings) -> Backend = ::OpenClawBackend
+    var backendFactory: (Settings) -> Backend = ::defaultBackend
+
+    /** [DemoBackend] for the demo URL, otherwise [OpenClawBackend]. */
+    fun defaultBackend(settings: Settings): Backend =
+        if (settings.demo) DemoBackend() else OpenClawBackend(settings)
 
     /** Runs turns off the main thread, one at a time. */
     @Volatile
