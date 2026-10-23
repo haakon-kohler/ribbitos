@@ -49,6 +49,14 @@ class TurnTest {
     }
 
     @Test
+    fun passesTheHistoryAlong() {
+        val backend = FakeBackend()
+        val earlier = listOf(Transcript.Message(Transcript.USER, "before"))
+        Turn(backend, "hi", "conv", earlier).start({ it.run() }, post, listener)
+        assertEquals(listOf(earlier), backend.histories)
+    }
+
+    @Test
     fun blankReplyIsShownAsNoReply() {
         run(FakeBackend { _, _ -> " " })
         assertEquals(Turn.NO_REPLY, finished?.text)

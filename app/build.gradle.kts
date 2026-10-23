@@ -60,6 +60,15 @@ android {
         disable += "SyntheticAccessor"
     }
 
+    packaging {
+        resources {
+            // Several Apache jars (Anthropic SDK dependencies) each carry these. The dependency list is
+            // only a build listing; licenses and notices are merged, not dropped (Apache-2.0 needs them).
+            excludes += "META-INF/DEPENDENCIES"
+            merges += setOf("META-INF/LICENSE*", "META-INF/NOTICE*")
+        }
+    }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true // Robolectric UI tests.
@@ -98,6 +107,8 @@ tasks.named("check") {
 
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    // Claude: Anthropic's official Java SDK (net/ClaudeBackend.kt).
+    implementation("com.anthropic:anthropic-java:2.34.0")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.8")
 

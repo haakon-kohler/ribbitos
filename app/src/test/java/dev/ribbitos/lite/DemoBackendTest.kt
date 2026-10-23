@@ -1,8 +1,9 @@
 package dev.ribbitos.lite
 
+import dev.ribbitos.lite.net.ClaudeBackend
+import dev.ribbitos.lite.net.OpenAiBackend
 import dev.ribbitos.lite.net.OpenClawBackend
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -14,7 +15,7 @@ class DemoBackendTest {
     @Test
     fun streamsTheReplyWordByWord() {
         val deltas = mutableListOf<String>()
-        val reply = fast.send("hi", "c") { deltas += it }
+        val reply = fast.send("hi", emptyList(), "c") { deltas += it }
         assertEquals(DemoBackend.replyTo("hi"), reply)
         assertEquals(reply, deltas.joinToString(""))
         assertTrue(deltas.size > 1)
@@ -31,21 +32,21 @@ class DemoBackendTest {
 
     @Test
     fun errorShowsAFailure() {
-        val e = assertThrows(IOException::class.java) { fast.send("show an Error", "c") {} }
+        val e = assertThrows(IOException::class.java) { fast.send("show an Error", emptyList(), "c") {} }
         assertEquals(DemoBackend.ERROR, e.message)
     }
 
     @Test
     fun cancelStopsTheStream() {
         fast.cancel()
-        assertThrows(IOException::class.java) { fast.send("hi", "c") {} }
+        assertThrows(IOException::class.java) { fast.send("hi", emptyList(), "c") {} }
     }
 
     @Test
     fun interruptionIsAnIOExceptionAndKeepsTheFlag() {
         Thread.currentThread().interrupt()
         try {
-            assertThrows(IOException::class.java) { DemoBackend(wordDelayMs = 1).send("hi", "c") {} }
+            assertThrows(IOException::class.java) { DemoBackend(wordDelayMs = 1).send("hi", emptyList(), "c") {} }
             assertTrue(Thread.interrupted())
         } finally {
             Thread.interrupted()
@@ -54,20 +55,15 @@ class DemoBackendTest {
 
     @Test
     fun blankMessageIsRejected() {
-        assertThrows(IllegalArgumentException::class.java) { fast.send(" ", "c") {} }
+        assertThrows(IllegalArgumentException::class.java) { fast.send(" ", emptyList(), "c") {} }
     }
 
     @Test
-    fun theDemoUrlSelectsTheDemo() {
-        assertTrue(Settings("http://demo/v1").demo)
-        assertTrue(Wiring.defaultBackend(Settings("http://demo/v1")) is DemoBackend)
-    }
-
-    @Test
-    fun anyOtherUrlSelectsOpenClaw() {
-        assertFalse(Settings("http://gw:18789/v1").demo)
-        assertFalse(Settings("").demo)
-        assertTrue(Wiring.defaultBackend(Settings("http://gw:18789/v1")) is OpenClawBackend)
+    fun eachProviderGetsItsBackend() {
+        assertTrue(Wiring.defaultBackend(Settings(Provider.DEMO)) is DemoBackend)
+        assertTrue(Wiring.defaultBackend(Settings(Provider.OPENCLAW, "http://gw:18789/v1")) is OpenClawBackend)
+        assertTrue(Wiring.defaultBackend(Settings(Provider.OPENAI, token = "k")) is OpenAiBackend)
+        assertTrue(Wiring.defaultBackend(Settings(Provider.CLAUDE, token = "k")) is ClaudeBackend)
     }
 
     private companion object {

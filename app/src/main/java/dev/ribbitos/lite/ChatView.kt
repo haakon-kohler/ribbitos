@@ -58,7 +58,7 @@ class ChatView(private val column: LinearLayout, private val scroll: ScrollView)
     private fun dp(v: Int) = (v * density).toInt()
 
     private companion object {
-        const val TEXT_SP = 15f
+        const val TEXT_SP = 17f
         const val PAD_H = 10
         const val PAD_V = 6
         const val GAP = 6

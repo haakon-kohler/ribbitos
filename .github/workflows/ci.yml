@@ -1,0 +1,48 @@
+# Every rule in docs/RULES.md that a machine can check runs here, on every push and pull request.
+# Actions are pinned to full commit SHAs (tags can be moved), each a release at least two weeks old
+# when pinned; the comment names the release.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  app:
+    name: App (compile, lint, detekt, tests, coverage, release build)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      # `check` = Kotlin warnings as errors + Android lint (all checks) + detekt (all rules, with and
+      # without type resolution) + unit and Robolectric tests + the Kover coverage gate.
+      # `assembleRelease` runs R8, which is where SDK keep-rule problems show up at build time.
+      - run: ./gradlew --no-daemon check assembleRelease
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: reports
+          path: app/build/reports/
+
+  tools:
+    name: Tools (shellcheck, ruff)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      # Exact versions, so a new lint rule upstream can't turn a green commit red.
+      - run: pip install ruff==0.17.2 shellcheck-py==0.11.0.1
+      - run: shellcheck -x -P tools tools/*.sh # .shellcheckrc: every optional check on
+      - run: ruff check tools/ # ruff.toml: every rule on, deviations listed with reasons
+      - run: ruff format --check tools/

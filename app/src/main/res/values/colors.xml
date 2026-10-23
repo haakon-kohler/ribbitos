@@ -3,7 +3,11 @@
     <color name="bg">#000000</color>
     <color name="fg">#F2F2F2</color>
     <color name="dim">#8E949C</color>
-    <color name="accent">#7BD34A</color>
+    <color name="accent">#FFB020</color>
+    <!-- The accent at 70 % over black: the outline of your own messages. -->
+    <color name="bubble_outline">#B37B16</color>
     <color name="error">#FF5C5C</color>
     <color name="field">#1A1A1A</color>
+    <!-- The frog stays green whatever the accent: launcher icon, lock screen. -->
+    <color name="frog">#7BD34A</color>
 </resources>

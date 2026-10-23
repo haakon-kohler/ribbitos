@@ -19,4 +19,10 @@ object Limits {
 
     /** Largest transcript file read back at startup; anything bigger starts a fresh chat. */
     const val MAX_TRANSCRIPT_BYTES = 8_000_000L
+
+    /** Earlier messages sent along to stateless APIs (OpenAI, Claude) with each new one. */
+    const val MAX_HISTORY_MESSAGES = 40
+
+    /** Total text sent as history; the oldest messages are dropped past it. */
+    const val MAX_HISTORY_CHARS = 60_000
 }

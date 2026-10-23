@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- The Anthropic SDK's dependencies mention Java APIs Android lacks, on paths ribbitOS never runs:
+         Jackson's JDK 22+ fast number parser (java.lang.foreign) and webhook signature checks
+         (java.net.http). Only these two jars are exempt; the check stays on for everything else. -->
+    <issue id="InvalidPackage">
+        <ignore path="**/jackson-core-*.jar" />
+        <ignore path="**/standardwebhooks-*.jar" />
+    </issue>
+</lint>

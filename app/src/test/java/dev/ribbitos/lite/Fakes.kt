@@ -7,13 +7,20 @@ import java.util.concurrent.Executor
 /** A [Backend] that replies from [script] and records what it was asked. */
 class FakeBackend(private val script: FakeBackend.(String, (String) -> Unit) -> String = { _, _ -> "ok" }) : Backend {
     val sent = mutableListOf<Pair<String, String>>()
+    val histories = mutableListOf<List<Transcript.Message>>()
 
     @Volatile
     var cancelled = false
         private set
 
-    override fun send(text: String, conversation: String, onDelta: (String) -> Unit): String {
+    override fun send(
+        text: String,
+        history: List<Transcript.Message>,
+        conversation: String,
+        onDelta: (String) -> Unit,
+    ): String {
         sent += text to conversation
+        histories += history
         return script(text, onDelta)
     }
 

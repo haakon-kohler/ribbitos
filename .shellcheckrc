@@ -1,0 +1,4 @@
+# shellcheck with every optional check on (tools/*.sh). Deviations would be listed here with reasons;
+# there are none.
+enable=all
+external-sources=true

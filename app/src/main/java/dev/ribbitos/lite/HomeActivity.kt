@@ -27,6 +27,7 @@ class HomeActivity : Activity() {
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
         setContentView(R.layout.activity_home)
+        Screen.immersive(this)
         transcript.messages.forEach { chat.add(it) }
 
         // Wraps like a multi-line field, but the keyboard's action key sends.
@@ -65,7 +66,10 @@ class HomeActivity : Activity() {
         when {
             text.isEmpty() || turn != null -> return
             !settings.configured -> openSettings()
-            else -> start(Turn(Wiring.backendFactory(settings), text, transcript.conversation), text)
+            else -> {
+                val earlier = transcript.messages.toList()
+                start(Turn(Wiring.backendFactory(settings), text, transcript.conversation, earlier), text)
+            }
         }
     }
 

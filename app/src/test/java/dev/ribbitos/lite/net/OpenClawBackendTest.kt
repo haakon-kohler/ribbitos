@@ -1,7 +1,9 @@
 package dev.ribbitos.lite.net
 
 import dev.ribbitos.lite.Limits
+import dev.ribbitos.lite.Provider
 import dev.ribbitos.lite.Settings
+import dev.ribbitos.lite.Transcript
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.SocketPolicy
@@ -18,6 +20,7 @@ import org.junit.Test
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+/** OpenClaw's backend, and the chat-completions client it shares with OpenAI. */
 class OpenClawBackendTest {
     private val server = MockWebServer()
     private lateinit var settings: Settings
@@ -25,7 +28,7 @@ class OpenClawBackendTest {
     @Before
     fun start() {
         server.start()
-        settings = Settings(baseUrl = server.url("/v1").toString(), token = "t0k", agent = "openclaw/r1")
+        settings = Settings(Provider.OPENCLAW, server.url("/v1").toString(), "t0k", "openclaw/r1")
     }
 
     @After
@@ -37,8 +40,13 @@ class OpenClawBackendTest {
 
     private fun delta(text: String) = """{"choices":[{"delta":{"content":"$text"}}]}"""
 
+    private val earlier = listOf(
+        Transcript.Message(Transcript.USER, "old"),
+        Transcript.Message(Transcript.ASSISTANT, "reply"),
+    )
+
     private fun send(text: String = "hi", deltas: MutableList<String> = mutableListOf()) =
-        OpenClawBackend(settings).send(text, "conv-1") { deltas += it }
+        OpenClawBackend(settings).send(text, earlier, "conv-1") { deltas += it }
 
     @Test
     fun streamsDeltasInOrderAndReturnsTheWholeReply() {
@@ -49,7 +57,7 @@ class OpenClawBackendTest {
     }
 
     @Test
-    fun requestCarriesTokenAgentSessionAndOnlyTheNewMessage() {
+    fun sendsTokenAgentSessionAndOnlyTheNewMessage() {
         server.enqueue(sse("[DONE]"))
         send("what's up")
         val req = server.takeRequest(1, TimeUnit.SECONDS) ?: error("no request")
@@ -61,21 +69,20 @@ class OpenClawBackendTest {
         assertEquals(OpenClawBackend.sessionUser("conv-1"), body.getString("user"))
         assertTrue(body.getBoolean("stream"))
         val messages = body.getJSONArray("messages")
-        assertEquals(2, messages.length())
+        assertEquals("the gateway keeps the history, so it isn't sent", 2, messages.length())
         assertEquals("system", messages.getJSONObject(0).getString("role"))
-        assertEquals("user", messages.getJSONObject(1).getString("role"))
         assertEquals("what's up", messages.getJSONObject(1).getString("content"))
     }
 
     @Test
     fun noTokenMeansNoAuthorizationHeader() {
-        val req = OpenClawBackend.request(settings.copy(token = ""), "hi", "c")
+        val req = ChatCompletions("http://gw/v1", "", "").request(JSONObject())
         assertNull(req.header("Authorization"))
     }
 
     @Test
     fun trailingSlashInBaseUrlIsHandled() {
-        val req = OpenClawBackend.request(settings.copy(baseUrl = "http://gw:18789/v1/"), "hi", "c")
+        val req = ChatCompletions("http://gw:18789/v1/", "", "").request(JSONObject())
         assertEquals("http://gw:18789/v1/chat/completions", req.url.toString())
     }
 
@@ -93,15 +100,14 @@ class OpenClawBackendTest {
     @Test
     fun malformedJsonReplyIsAnIOException() {
         server.enqueue(MockResponse().setHeader("Content-Type", "application/json").setBody("""{"nope":1}"""))
-        val e = assertThrows(IOException::class.java) { send() }
-        assertEquals("Malformed reply from the gateway", e.message)
+        assertEquals("Malformed reply from the server", assertThrows(IOException::class.java) { send() }.message)
     }
 
     @Test
-    fun unauthorizedNamesTheToken() = assertHttpError(401, "", "Gateway rejected the token (HTTP 401)")
+    fun unauthorizedNamesTheKey() = assertHttpError(401, "", "The server rejected the key (HTTP 401)")
 
     @Test
-    fun forbiddenNamesTheToken() = assertHttpError(403, "", "Gateway rejected the token (HTTP 403)")
+    fun forbiddenNamesTheKey() = assertHttpError(403, "", "The server rejected the key (HTTP 403)")
 
     @Test
     fun notFoundPointsAtTheEndpointSetting() =
@@ -127,8 +133,7 @@ class OpenClawBackendTest {
     fun errorMidStreamFailsAfterDeliveringWhatCameFirst() {
         server.enqueue(sse(delta("partial"), """{"error":{"message":"tool failed"}}"""))
         val deltas = mutableListOf<String>()
-        val e = assertThrows(IOException::class.java) { send(deltas = deltas) }
-        assertEquals("tool failed", e.message)
+        assertEquals("tool failed", assertThrows(IOException::class.java) { send(deltas = deltas) }.message)
         assertEquals(listOf("partial"), deltas)
     }
 
@@ -153,7 +158,7 @@ class OpenClawBackendTest {
             backend.cancel()
         }
         canceller.start()
-        assertThrows(IOException::class.java) { backend.send("hi", "c") {} }
+        assertThrows(IOException::class.java) { backend.send("hi", emptyList(), "c") {} }
         canceller.join()
     }
 
@@ -161,8 +166,9 @@ class OpenClawBackendTest {
     fun cancelBeforeSendIsHarmless() = OpenClawBackend(settings).cancel()
 
     @Test
-    fun unconfiguredSettingsAreRejected() {
-        assertThrows(IllegalArgumentException::class.java) { OpenClawBackend(Settings()) }
+    fun unconfiguredOrForeignSettingsAreRejected() {
+        assertThrows(IllegalArgumentException::class.java) { OpenClawBackend(Settings(Provider.OPENCLAW)) }
+        assertThrows(IllegalArgumentException::class.java) { OpenClawBackend(settings.copy(provider = Provider.DEMO)) }
     }
 
     @Test
@@ -172,7 +178,7 @@ class OpenClawBackendTest {
 
     @Test
     fun blankConversationIsRejected() {
-        assertThrows(IllegalArgumentException::class.java) { OpenClawBackend.request(settings, "hi", "") }
+        assertThrows(IllegalArgumentException::class.java) { OpenClawBackend.body(settings, "hi", "") }
     }
 
     @Test
@@ -180,7 +186,7 @@ class OpenClawBackendTest {
         val chunk = "x".repeat(Limits.MAX_REPLY_CHARS / 2 + 1)
         val stream = Buffer().writeUtf8("data: ${delta(chunk)}\n\n".repeat(3) + "data: [DONE]\n\n")
         val deltas = mutableListOf<String>()
-        val reply = OpenClawBackend.readStream(stream) { deltas += it }
+        val reply = ChatCompletions.readStream(stream) { deltas += it }
         assertEquals(Limits.MAX_REPLY_CHARS, reply.length)
         assertEquals(reply, deltas.joinToString(""))
         assertFalse("reading stopped before the end", stream.exhausted())
@@ -191,7 +197,7 @@ class OpenClawBackendTest {
         val stream = Buffer()
             .writeUtf8(": keepalive\n".repeat(Limits.MAX_STREAM_LINES))
             .writeUtf8("data: ${delta("late")}\n\n")
-        assertEquals("", OpenClawBackend.readStream(stream) {})
+        assertEquals("", ChatCompletions.readStream(stream) {})
         assertFalse(stream.exhausted())
     }
 

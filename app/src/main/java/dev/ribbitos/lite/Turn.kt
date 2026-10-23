@@ -11,6 +11,7 @@ class Turn(
     private val backend: Backend,
     private val text: String,
     private val conversation: String,
+    private val history: List<Transcript.Message> = emptyList(),
 ) {
     /** Receives a turn's progress; both callbacks arrive through `post`. */
     interface Listener {
@@ -46,7 +47,7 @@ class Turn(
     private fun run(post: (Runnable) -> Unit, listener: Listener): Transcript.Message {
         val partial = StringBuilder()
         return try {
-            val reply = backend.send(text, conversation) { delta ->
+            val reply = backend.send(text, history, conversation) { delta ->
                 partial.append(delta)
                 val shown = partial.toString()
                 post(Runnable { listener.onPartial(shown) })

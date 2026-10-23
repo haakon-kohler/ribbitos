@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,55 +18,95 @@ class SettingsTest {
     private val ctx: Context get() = RuntimeEnvironment.getApplication()
 
     @Test
-    fun defaultsAreUnconfigured() {
+    fun defaultIsTheDemoAndItNeedsNothing() {
         val s = Settings.load(ctx)
-        assertEquals(Settings(), s)
-        assertFalse(s.configured)
-        assertEquals(Settings.DEFAULT_AGENT, s.agent)
+        assertEquals(Settings(Provider.DEMO), s)
+        assertTrue(s.configured)
     }
 
     @Test
-    fun saveTrimsAndRoundTrips() {
-        Settings(" http://gw:18789/v1 ", " tok ", " openclaw/r1 ").save(ctx)
-        assertEquals(Settings("http://gw:18789/v1", "tok", "openclaw/r1"), Settings.load(ctx))
+    fun eachProviderStartsFromItsDefaults() {
+        assertEquals(
+            Settings(Provider.OPENAI, "https://api.openai.com/v1", "", "gpt-6.1-sol"),
+            Settings.load(ctx, Provider.OPENAI)
+        )
+        assertEquals(
+            Settings(Provider.CLAUDE, "https://api.anthropic.com", "", "claude-opus-5-5"),
+            Settings.load(ctx, Provider.CLAUDE),
+        )
+        assertEquals(Settings(Provider.OPENCLAW, "", "", "openclaw/default"), Settings.load(ctx, Provider.OPENCLAW))
     }
 
     @Test
-    fun blankAgentFallsBackToTheDefault() {
-        Settings("http://gw/v1", "", " ").save(ctx)
-        assertEquals(Settings.DEFAULT_AGENT, Settings.load(ctx).agent)
+    fun saveTrimsAndMakesTheProviderActive() {
+        Settings(Provider.OPENCLAW, " http://gw:18789/v1 ", " tok ", " openclaw/r1 ").save(ctx)
+        assertEquals(Settings(Provider.OPENCLAW, "http://gw:18789/v1", "tok", "openclaw/r1"), Settings.load(ctx))
     }
 
     @Test
-    fun onlyHttpUrlsCountAsConfigured() {
-        assertTrue(Settings("http://192.168.1.20:18789/v1").configured)
-        assertTrue(Settings("https://gw.example/v1").configured)
-        assertFalse(Settings("gw:18789").configured)
-        assertFalse(Settings("ftp://gw/v1").configured)
-        assertFalse(Settings("   ").configured)
+    fun providersKeepTheirOwnValues() {
+        Settings(Provider.CLAUDE, token = "claude-key").save(ctx)
+        Settings(Provider.OPENAI, token = "openai-key").save(ctx)
+        assertEquals(Provider.OPENAI, Settings.load(ctx).provider)
+        assertEquals("claude-key", Settings.load(ctx, Provider.CLAUDE).token)
+        assertEquals("openai-key", Settings.load(ctx, Provider.OPENAI).token)
+    }
+
+    @Test
+    fun blankFieldsFallBackToDefaults() {
+        Settings(Provider.CLAUDE, " ", "k", " ").save(ctx)
+        assertEquals(Settings(Provider.CLAUDE, token = "k"), Settings.load(ctx))
+    }
+
+    @Test
+    fun whatEachProviderNeeds() {
+        assertTrue(Settings(Provider.OPENCLAW, "http://192.168.1.20:18789/v1").configured)
+        assertFalse(Settings(Provider.OPENCLAW, "gw:18789").configured)
+        assertFalse(Settings(Provider.OPENCLAW, "ftp://gw/v1").configured)
+        assertFalse(Settings(Provider.OPENAI).configured)
+        assertTrue(Settings(Provider.OPENAI, token = "k").configured)
+        assertFalse(Settings(Provider.CLAUDE, token = " ").configured)
+        assertFalse(Settings(Provider.CLAUDE, "nope", "k").configured)
+    }
+
+    @Test
+    fun unknownProviderIdsAreTheDemoOrNothing() {
+        assertEquals(Provider.DEMO, Provider.of("nope"))
+        assertNull(Provider.find("nope"))
+        assertEquals(Provider.CLAUDE, Provider.of("claude"))
     }
 
     @Test
     fun toStringHidesTheToken() {
-        assertFalse(Settings("http://gw/v1", "secret").toString().contains("secret"))
-        assertTrue(Settings("http://gw/v1", "").toString().contains("token=,"))
+        assertFalse(Settings(Provider.CLAUDE, token = "secret").toString().contains("secret"))
+        assertTrue(Settings(Provider.CLAUDE).toString().contains("token=,"))
     }
 
     @Test
-    fun adbConfigSetsEverything() {
+    fun adbConfigSetsAProviderAndMakesItActive() {
         val intent = Intent(ACTION)
-            .putExtra(Settings.BASE_URL, "http://gw/v1")
-            .putExtra(Settings.TOKEN, "tok")
-            .putExtra(Settings.AGENT, "openclaw/r1")
+            .putExtra(Settings.PROVIDER, "claude")
+            .putExtra(Settings.TOKEN, "k")
+            .putExtra(Settings.MODEL, "claude-sonnet-5-5")
         ConfigReceiver().onReceive(ctx, intent)
-        assertEquals(Settings("http://gw/v1", "tok", "openclaw/r1"), Settings.load(ctx))
+        assertEquals(Settings(Provider.CLAUDE, token = "k", model = "claude-sonnet-5-5"), Settings.load(ctx))
     }
 
     @Test
-    fun adbConfigKeepsWhatItOmits() {
-        Settings("http://gw/v1", "tok", "openclaw/r1").save(ctx)
+    fun adbConfigWithoutAProviderEditsTheActiveOne() {
+        Settings(Provider.OPENCLAW, "http://gw/v1", "tok").save(ctx)
         ConfigReceiver().onReceive(ctx, Intent(ACTION).putExtra(Settings.TOKEN, "new"))
-        assertEquals(Settings("http://gw/v1", "new", "openclaw/r1"), Settings.load(ctx))
+        assertEquals(Settings(Provider.OPENCLAW, "http://gw/v1", "new"), Settings.load(ctx))
+    }
+
+    @Test
+    fun adbConfigWithAnUnknownProviderChangesNothing() {
+        Settings(Provider.OPENCLAW, "http://gw/v1", "tok").save(ctx)
+        ConfigReceiver().onReceive(
+            ctx,
+            Intent(ACTION).putExtra(Settings.PROVIDER, "nope").putExtra(Settings.TOKEN, "x")
+        )
+        assertEquals(Settings(Provider.OPENCLAW, "http://gw/v1", "tok"), Settings.load(ctx))
     }
 
     private companion object {

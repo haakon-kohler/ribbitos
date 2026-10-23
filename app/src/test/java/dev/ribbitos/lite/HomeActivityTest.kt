@@ -59,7 +59,8 @@ class HomeActivityTest {
     }
 
     private fun launch(configured: Boolean = true) {
-        if (configured) Settings("http://gw/v1", "tok").save(ctx)
+        val settings = if (configured) Settings(Provider.OPENCLAW, "http://gw/v1", "tok") else Settings(Provider.CLAUDE)
+        settings.save(ctx)
         controller = Robolectric.buildActivity(HomeActivity::class.java).setup()
     }
 
@@ -129,6 +130,26 @@ class HomeActivityTest {
         assertEquals(listOf("hi", "Hello"), texts)
         send("again")
         assertEquals(conversation, backend.sent.last().second)
+    }
+
+    @Test
+    fun eachTurnGetsTheConversationSoFar() {
+        launch()
+        send("hi")
+        send("again")
+        assertEquals(emptyList<Transcript.Message>(), backend.histories.first())
+        assertEquals(
+            listOf(Transcript.Message(Transcript.USER, "hi"), Transcript.Message(Transcript.ASSISTANT, "Hello")),
+            backend.histories.last(),
+        )
+    }
+
+    @Test
+    fun theDefaultIsTheDemo() {
+        Wiring.backendFactory = Wiring::defaultBackend
+        Wiring.executor = Executor { it.run() }
+        controller = Robolectric.buildActivity(HomeActivity::class.java).setup()
+        assertEquals(ctx.getString(R.string.hint_empty), hint.text.toString())
     }
 
     @Test

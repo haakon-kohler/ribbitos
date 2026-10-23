@@ -16,9 +16,10 @@ fails on any finding.
 | 7 | Check return values and parameters | No ignored results; parameters validated; no swallowed exceptions except the documented "not JSON" case | detekt `IgnoredReturnValue`, `SwallowedException`, `TooGenericExceptionCaught` |
 | 8 | Limited preprocessor | No reflection, annotation processing or code generation; `BuildConfig` is off | build config; review |
 | 9 | Restricted pointer use | No `!!`, no unchecked platform types, no casts that can fail | detekt `UnsafeCallOnNullableType`, `UnsafeCast`, `HasPlatformType` |
-| 10 | All warnings on, zero warnings | Kotlin `allWarningsAsErrors`; Android lint `checkAllWarnings` + `warningsAsErrors`; detekt `allRules` with `maxIssues: 0`, including ktlint formatting | the build |
+| 10 | All warnings on, zero warnings | Kotlin `allWarningsAsErrors`; Android lint `checkAllWarnings` + `warningsAsErrors`; detekt `allRules` with `maxIssues: 0`, including ktlint formatting; shellcheck with every optional check and ruff with every rule for `tools/` | the build; CI |
 
-Every deviation is written next to the setting that makes it, with its reason:
-`config/detekt/detekt.yml` and the `lint {}` block in `app/build.gradle.kts`.
+Every deviation is written next to the setting that makes it, with its reason; the full list of
+those files is in [RULES.md](RULES.md#the-rules). CI (`.github/workflows/ci.yml`)
+runs all of it on every push.
 
 Coverage is gated too (Kover, `koverVerifyDebug`): 90 % of lines and 80 % of branches.

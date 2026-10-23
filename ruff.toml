@@ -1,0 +1,15 @@
+# ruff with every rule on (tools/*.py). Only deviations are listed, each with its reason.
+line-length = 120  # Same limit as the Kotlin code (config/detekt/detekt.yml).
+target-version = "py310"
+
+[lint]
+select = ["ALL"]
+ignore = [
+    "D203",  # Conflicts with D211 (no blank line before a class docstring); D211 applies.
+    "D213",  # Conflicts with D212 (summary on the docstring's first line); D212 applies.
+    "T201",  # tools/ are command-line programs: printing is their user interface.
+    "COM812",  # Trailing commas are left to `ruff format`, which this rule conflicts with.
+]
+
+[lint.flake8-copyright]
+notice-rgx = "SPDX-License-Identifier: MIT"
