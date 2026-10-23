@@ -1,0 +1,5 @@
+# rabbit r1 (MediaTek MT6765): let the logged-in user reach it without sudo.
+# 0003 = BROM, 2000 = preloader (serial; takes the FASTBOOT handoff, mtkclient), 201c = LK fastboot.
+# Install: sudo install -m 644 ~/r1/70-rabbit-r1.rules /etc/udev/rules.d/ && sudo udevadm control --reload
+SUBSYSTEM=="usb", ATTR{idVendor}=="0e8d", ATTR{idProduct}=="0003|2000|201c", TAG+="uaccess"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0e8d", ATTRS{idProduct}=="0003|2000", TAG+="uaccess"

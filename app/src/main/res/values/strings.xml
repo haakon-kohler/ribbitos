@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ribbitOS lite</string>
+    <string name="title">ribbit</string>
+    <string name="new_chat">New chat</string>
+    <string name="settings">Settings</string>
+    <string name="send">Send</string>
+    <string name="stop">Stop</string>
+    <string name="input_hint">Message</string>
+    <string name="hint_empty">Type a message to start.</string>
+    <string name="hint_unconfigured">Not connected yet. Tap the gear to set your gateway.</string>
+    <string name="base_url">Gateway URL</string>
+    <string name="base_url_hint">http://192.168.1.20:18789/v1</string>
+    <string name="token">Token</string>
+    <string name="agent">Agent</string>
+    <string name="agent_hint">openclaw/default</string>
+    <string name="save">Save</string>
+    <string name="base_url_invalid">Needs a full http:// or https:// URL</string>
+    <string name="settings_help">ribbitOS talks to an OpenClaw gateway’s /v1/chat/completions endpoint. The token is an operator credential: keep the gateway on your LAN or tailnet.</string>
+</resources>

@@ -1,0 +1,41 @@
+ribbitOS builds on work by others.
+
+- robotOS / r1ptt (https://github.com/windoze95/robotOS), at commit 20bd8f9, the last version
+  with OpenClaw support. Adapted here: app/src/main/java/dev/ribbitos/lite/net/Sse.kt (from
+  net/Sse.kt), tools/lib.sh and tools/flash-gsi.sh, plus the OpenClaw chat-completions approach
+  (only the new message is sent; `user` keys the gateway session). Under the MIT license:
+
+    MIT License
+
+    Copyright (c) 2026 Julian Dice
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+- Material Design icons by Google (https://github.com/google/material-design-icons), Apache
+  License 2.0 (https://www.apache.org/licenses/LICENSE-2.0): the send, stop, add and tune glyph
+  paths in app/src/main/res/drawable/ic_send.xml, ic_stop.xml, ic_new.xml and ic_settings.xml.
+- r1_escape (https://github.com/RabbitHoleEscapeR1/r1_escape): the MediaTek preloader FASTBOOT
+  handshake that tools/enter-fastboot.py reimplements.
+- TurboTheTurtle/rabbit-r1-firmware: R1 partition layout and hardware notes.
+- Rabbit Inc.: official developer mode, the stock firmware images, and the flash sequence in its
+  WebUSB flash tool, which tools/flash-stock.sh follows.
+- Andy Yan's LineageOS GSI builds; mtkclient by B. Kerler (used, not included).
+
+ribbitOS is not affiliated with Rabbit Inc. or the OpenClaw project. The repository contains no
+firmware: stock rabbitOS and LineageOS images are downloaded by the user from their publishers.

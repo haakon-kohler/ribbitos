@@ -1,0 +1,42 @@
+# detekt with every rule on (allRules = true in app/build.gradle.kts), zero issues allowed.
+# Only deviations from that are listed here, each with its reason. See docs/POWER_OF_TEN.md.
+
+build:
+  maxIssues: 0
+
+complexity:
+  # Power of Ten rule 4: short functions. 60 printed lines in C; Kotlin is denser.
+  LongMethod:
+    threshold: 40
+  CyclomaticComplexMethod:
+    threshold: 10
+  NestedBlockDepth:
+    threshold: 3
+  LongParameterList:
+    functionThreshold: 5
+    constructorThreshold: 5
+
+exceptions:
+  SwallowedException:
+    # A non-JSON error body is expected (proxies, HTML 502 pages); the HTTP status still reports it.
+    ignoredExceptionTypes:
+      - InterruptedException
+      - MalformedURLException
+      - NumberFormatException
+      - ParseException
+      - JSONException
+
+style:
+  # Guard clauses (`?: return`, early `return`) read better than nesting (rule 1).
+  ReturnCount:
+    max: 2
+    excludeGuardClauses: true
+  MaxLineLength:
+    maxLineLength: 120
+  # Android requires public no-arg Activity/Receiver classes; nothing else is left open.
+  UnnecessaryAbstractClass:
+    active: true
+
+formatting:
+  MaximumLineLength:
+    maxLineLength: 120

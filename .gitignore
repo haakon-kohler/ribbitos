@@ -1,0 +1,10 @@
+.gradle/
+build/
+/local.properties
+/out/
+/firmware/
+*.apk
+*.bin
+*.img
+*.img.gz
+*.zip
