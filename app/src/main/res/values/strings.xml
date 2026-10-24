@@ -7,6 +7,10 @@
     <string name="send">Send</string>
     <string name="stop">Stop</string>
     <string name="input_hint">Message</string>
+    <string name="mic">Hold to talk</string>
+    <string name="listening">Listening…</string>
+    <string name="transcribing">Transcribing…</string>
+    <string name="not_heard">Didn’t catch that; hold the mic and try again</string>
     <string name="hint_empty">Type a message to start.</string>
     <string name="hint_unconfigured">Not set up yet: open settings to add a key or a gateway.</string>
     <string name="back">‹ Back</string>

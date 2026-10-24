@@ -25,4 +25,7 @@ object Limits {
 
     /** Total text sent as history; the oldest messages are dropped past it. */
     const val MAX_HISTORY_CHARS = 60_000
+
+    /** Longest voice recording; the microphone stops by itself after this. */
+    const val MAX_RECORD_SECONDS = 30
 }

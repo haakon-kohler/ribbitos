@@ -11,6 +11,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import dev.ribbitos.lite.voice.VoiceInput
 import java.io.File
 
 /** The home screen: one conversation, a text box, and the reply streaming in. */
@@ -20,6 +21,8 @@ class HomeActivity : Activity() {
     private val hint by lazy { findViewById<TextView>(R.id.hint) }
     private val input by lazy { findViewById<EditText>(R.id.input) }
     private val send by lazy { findViewById<ImageButton>(R.id.send) }
+
+    private val voice by lazy { VoiceInput(this, input, findViewById(R.id.mic), ::runOnUiThread) }
 
     /** The turn in flight; null when idle. */
     private var turn: Turn? = null
@@ -37,6 +40,7 @@ class HomeActivity : Activity() {
         send.setOnClickListener { if (turn != null) turn?.stop() else submit() }
         findViewById<View>(R.id.new_chat).setOnClickListener { newChat() }
         findViewById<View>(R.id.settings).setOnClickListener { openSettings() }
+        voice.attach()
     }
 
     override fun onResume() {
@@ -46,6 +50,7 @@ class HomeActivity : Activity() {
 
     override fun onDestroy() {
         turn?.stop()
+        voice.close()
         super.onDestroy()
     }
 

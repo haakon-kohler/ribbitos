@@ -1,8 +1,13 @@
 package dev.ribbitos.lite
 
+import android.content.Context
 import dev.ribbitos.lite.net.ClaudeBackend
 import dev.ribbitos.lite.net.OpenAiBackend
 import dev.ribbitos.lite.net.OpenClawBackend
+import dev.ribbitos.lite.voice.MicRecorder
+import dev.ribbitos.lite.voice.Recorder
+import dev.ribbitos.lite.voice.Transcriber
+import dev.ribbitos.lite.voice.WhisperTranscriber
 import java.io.IOException
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -32,9 +37,17 @@ object Wiring {
     @Volatile
     var backendFactory: (Settings) -> Backend = ::defaultBackend
 
-    /** Runs turns off the main thread, one at a time. */
+    /** Runs turns and transcriptions off the main thread, one at a time. */
     @Volatile
     var executor: Executor = Executors.newSingleThreadExecutor()
+
+    /** The microphone. Replace to record from elsewhere (or a fake in tests). */
+    @Volatile
+    var recorderFactory: (Context) -> Recorder = ::MicRecorder
+
+    /** Speech to text. Replace to transcribe elsewhere (or a fake in tests). */
+    @Volatile
+    var transcriberFactory: (Context) -> Transcriber = ::WhisperTranscriber
 
     /** The built-in backend for each [Provider]. */
     fun defaultBackend(settings: Settings): Backend = when (settings.provider) {

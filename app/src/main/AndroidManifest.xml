@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Voice typing: audio is transcribed on the R1 itself and never leaves it. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <!-- Cleartext is for a self-hosted OpenClaw gateway on the LAN (http://host:18789). -->
     <application

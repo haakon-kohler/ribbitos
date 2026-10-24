@@ -5,6 +5,9 @@
 # Keep the SDK whole.
 -keep class com.anthropic.** { *; }
 
+# JNI finds these by class and method name (app/src/main/cpp/ribbit_whisper.c).
+-keep class dev.ribbitos.lite.voice.WhisperNative { native <methods>; }
+
 # Kept that way, R8 also traces the SDK's structured-outputs JSON-schema generator (victools), which
 # names two reflection types Android lacks. ribbitOS never generates schemas, so that code never runs.
 -dontwarn java.lang.reflect.AnnotatedParameterizedType
