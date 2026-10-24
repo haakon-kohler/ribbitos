@@ -25,7 +25,7 @@ class TurnTest {
         it.run()
     }
 
-    private fun run(backend: Backend) = Turn(backend, "hi", "conv").start({ it.run() }, post, listener)
+    private fun run(backend: Backend) = Turn(backend, Prompt("hi"), "conv").start({ it.run() }, post, listener)
 
     @Test
     fun streamsPartialsThenFinishesWithTheReply() {
@@ -52,7 +52,7 @@ class TurnTest {
     fun passesTheHistoryAlong() {
         val backend = FakeBackend()
         val earlier = listOf(Transcript.Message(Transcript.USER, "before"))
-        Turn(backend, "hi", "conv", earlier).start({ it.run() }, post, listener)
+        Turn(backend, Prompt("hi"), "conv", earlier).start({ it.run() }, post, listener)
         assertEquals(listOf(earlier), backend.histories)
     }
 
@@ -83,7 +83,7 @@ class TurnTest {
             failIfCancelled()
             "never"
         }
-        val turn = Turn(backend, "hi", "conv")
+        val turn = Turn(backend, Prompt("hi"), "conv")
         turn.start(executor, post, listener)
         turn.stop()
         executor.runAll()
@@ -94,7 +94,7 @@ class TurnTest {
     @Test
     fun stopBeforeAnythingArrivedSaysStopped() {
         val executor = QueueExecutor()
-        val turn = Turn(FakeBackend { _, _ -> failIfCancelled().let { "never" } }, "hi", "conv")
+        val turn = Turn(FakeBackend { _, _ -> failIfCancelled().let { "never" } }, Prompt("hi"), "conv")
         turn.start(executor, post, listener)
         turn.stop()
         executor.runAll()
@@ -104,11 +104,11 @@ class TurnTest {
 
     @Test
     fun blankTextIsRejected() {
-        assertThrows(IllegalArgumentException::class.java) { Turn(FakeBackend(), " ", "conv") }
+        assertThrows(IllegalArgumentException::class.java) { Turn(FakeBackend(), Prompt(" "), "conv") }
     }
 
     @Test
     fun blankConversationIsRejected() {
-        assertThrows(IllegalArgumentException::class.java) { Turn(FakeBackend(), "hi", "") }
+        assertThrows(IllegalArgumentException::class.java) { Turn(FakeBackend(), Prompt("hi"), "") }
     }
 }

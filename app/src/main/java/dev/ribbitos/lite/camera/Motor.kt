@@ -1,0 +1,58 @@
+package dev.ribbitos.lite.camera
+
+import java.io.File
+import java.io.IOException
+
+/**
+ * The R1's rotating camera. Angles are degrees, [MIN] to [MAX]: at [MAX] it looks away from the
+ * user, at [MIN] it has swung over the top to look at them.
+ */
+interface Motor {
+    /** Where the camera points now. */
+    val angle: Int
+
+    /** Turns the camera; throws [IOException] if this build may not drive the motor. */
+    @Throws(IOException::class)
+    fun turnTo(degrees: Int)
+
+    companion object {
+        const val MIN = 0
+        const val MAX = 180
+
+        /** One wheel notch. */
+        const val STEP = 15
+
+        /** Straight up. */
+        const val UP = 90
+
+        /** Where [steps] wheel notches from [current] land, kept within [MIN]..[MAX]. */
+        fun next(current: Int, steps: Int): Int = (current + steps * STEP).coerceIn(MIN, MAX)
+
+        /** Past [UP] towards the user the camera sees the world upside down. */
+        fun facesUser(angle: Int): Boolean = angle < UP
+    }
+}
+
+/**
+ * The motor driver's sysfs file (MS35774 stepper). Writing an angle turns the camera there.
+ * rabbit's vendor SELinux policy lets only platform and system apps write it, which is why
+ * ribbitOS is signed with AOSP's public platform key (keys/README.md).
+ */
+class SysfsMotor(private val file: File = File(PATH)) : Motor {
+    override val angle: Int
+        get() = try {
+            file.readText().trim().toIntOrNull()?.coerceIn(Motor.MIN, Motor.MAX) ?: DEFAULT
+        } catch (expected: IOException) {
+            DEFAULT // Unreadable: assume the driver's power-on position.
+        }
+
+    override fun turnTo(degrees: Int) {
+        require(degrees in Motor.MIN..Motor.MAX) { "Angle $degrees outside ${Motor.MIN}..${Motor.MAX}" }
+        file.writeText(degrees.toString())
+    }
+
+    private companion object {
+        const val PATH = "/sys/devices/platform/step_motor_ms35774/orientation"
+        const val DEFAULT = 90
+    }
+}

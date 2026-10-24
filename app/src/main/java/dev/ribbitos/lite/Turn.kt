@@ -9,7 +9,7 @@ import java.util.concurrent.Executor
  */
 class Turn(
     private val backend: Backend,
-    private val text: String,
+    private val prompt: Prompt,
     private val conversation: String,
     private val history: List<Transcript.Message> = emptyList(),
 ) {
@@ -26,7 +26,6 @@ class Turn(
     private var stopped = false
 
     init {
-        require(text.isNotBlank()) { "A turn needs a message" }
         require(conversation.isNotBlank()) { "A turn needs a conversation id" }
     }
 
@@ -47,7 +46,7 @@ class Turn(
     private fun run(post: (Runnable) -> Unit, listener: Listener): Transcript.Message {
         val partial = StringBuilder()
         return try {
-            val reply = backend.send(text, history, conversation) { delta ->
+            val reply = backend.send(prompt, history, conversation) { delta ->
                 partial.append(delta)
                 val shown = partial.toString()
                 post(Runnable { listener.onPartial(shown) })

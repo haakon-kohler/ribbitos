@@ -1,6 +1,8 @@
 package dev.ribbitos.lite
 
 import android.content.Context
+import dev.ribbitos.lite.camera.Motor
+import dev.ribbitos.lite.camera.SysfsMotor
 import dev.ribbitos.lite.net.ClaudeBackend
 import dev.ribbitos.lite.net.OpenAiBackend
 import dev.ribbitos.lite.net.OpenClawBackend
@@ -17,15 +19,22 @@ import java.util.concurrent.Executors
  * it in [Wiring.defaultBackend] (or replace [Wiring.backendFactory]). [DemoBackend] is the smallest
  * complete example; [OpenClawBackend], [OpenAiBackend] and [ClaudeBackend] are the real ones.
  */
+/** What the user sends: text, and optionally a photo (JPEG, see [dev.ribbitos.lite.camera.Photo]). */
+class Prompt(val text: String, val photo: ByteArray? = null) {
+    init {
+        require(text.isNotBlank()) { "A prompt needs text" }
+    }
+}
+
 interface Backend {
     /**
-     * Sends [text] as the next message in [conversation] (a stable id; a new chat gets a new one)
+     * Sends [prompt] as the next message in [conversation] (a stable id; a new chat gets a new one)
      * and streams the reply through [onDelta]. [history] is everything said before, oldest first,
      * for backends whose servers don't keep it (see [History.forTurn]). Runs on a worker thread and
      * returns the whole reply. Every failure, including [cancel], surfaces as an [IOException].
      */
     @Throws(IOException::class)
-    fun send(text: String, history: List<Transcript.Message>, conversation: String, onDelta: (String) -> Unit): String
+    fun send(prompt: Prompt, history: List<Transcript.Message>, conversation: String, onDelta: (String) -> Unit): String
 
     /** Aborts an in-flight [send] from another thread; that [send] then throws. */
     fun cancel()
@@ -44,6 +53,10 @@ object Wiring {
     /** The microphone. Replace to record from elsewhere (or a fake in tests). */
     @Volatile
     var recorderFactory: (Context) -> Recorder = ::MicRecorder
+
+    /** The R1's rotating camera. Replace to drive another motor (or a fake in tests). */
+    @Volatile
+    var motorFactory: () -> Motor = ::SysfsMotor
 
     /** Speech to text. Replace to transcribe elsewhere (or a fake in tests). */
     @Volatile

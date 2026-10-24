@@ -1,6 +1,7 @@
 package dev.ribbitos.lite.net
 
 import dev.ribbitos.lite.Backend
+import dev.ribbitos.lite.Prompt
 import dev.ribbitos.lite.Provider
 import dev.ribbitos.lite.Settings
 import dev.ribbitos.lite.Style
@@ -27,14 +28,11 @@ class OpenClawBackend(private val settings: Settings) : Backend {
     }
 
     override fun send(
-        text: String,
+        prompt: Prompt,
         history: List<Transcript.Message>,
         conversation: String,
         onDelta: (String) -> Unit,
-    ): String {
-        require(text.isNotBlank()) { "Empty message" }
-        return http.stream(body(settings, text, conversation), onDelta)
-    }
+    ): String = http.stream(body(settings, prompt, conversation), onDelta)
 
     override fun cancel() = http.cancel()
 
@@ -43,11 +41,11 @@ class OpenClawBackend(private val settings: Settings) : Backend {
         fun sessionUser(conversation: String): String = "ribbitos-$conversation"
 
         /** The request body for one new message: the gateway already has the rest. */
-        fun body(s: Settings, text: String, conversation: String): JSONObject {
+        fun body(s: Settings, prompt: Prompt, conversation: String): JSONObject {
             require(conversation.isNotBlank()) { "No conversation id" }
             val messages = JSONArray()
                 .put(JSONObject().put("role", "system").put("content", Style.SYSTEM))
-                .put(JSONObject().put("role", "user").put("content", text))
+                .put(ChatCompletions.userMessage(prompt.text, prompt.photo))
             return JSONObject()
                 .put("model", s.model)
                 .put("user", sessionUser(conversation))

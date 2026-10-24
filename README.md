@@ -11,19 +11,24 @@ or Claude. No rabbit account, no cloud in between, MIT-licensed.
   <img src="docs/images/power.png" width="240" alt="Holding the button brings up power off and restart">
 </p>
 
-> **v0.01-alpha.** Text chat works end to end on a real R1. Voice typing, sending a photo from the
-> camera, and a lock screen are next, for v0.01. Not accepting contributions yet.
+> **v0.01-alpha.** Text chat, voice typing, sending a photo from the camera and a simplified lock
+> screen work end to end on a real R1. Not accepting contributions yet.
 
 ## Features
 
 - **Pick who answers:** OpenClaw (self-hosted agent), OpenAI (or any server that speaks its Chat
   Completions API), Claude, or a built-in demo that needs no server at all.
+- **Voice typing on the R1 itself:** tap the mic, speak, and the words land in the text box.
+  Whisper runs on the device; no audio leaves it ([docs/VOICE.md](docs/VOICE.md)).
+- **Photos from the rotating camera:** the wheel turns it, the shutter sends what it sees with
+  your next message.
 - **Made for a 2.9-inch screen:** one conversation, replies stream in as they're written, a stop
   button, the scroll wheel scrolls, full screen with nothing else in the way.
 - **Your keys stay on your R1.** Set them on the device, or push them from a computer over USB so
   nobody types an API key on a tiny keyboard.
 - **Easy to extend:** one small `Backend` interface; adding a provider doesn't touch the screens.
-- **Built strictly:** NASA "Power of Ten" rules, every lint check on with zero warnings, 150+ tests,
+  Each device part is a small swappable module ([docs/MODDING.md](docs/MODDING.md)).
+- **Built strictly:** NASA "Power of Ten" rules, every lint check on with zero warnings, 200+ tests,
   all enforced in CI ([docs/RULES.md](docs/RULES.md)).
 
 ## Install
@@ -39,19 +44,25 @@ warranty, and a bad flash can brick it.
 5. In LineageOS's first-boot setup, turn on **Settings → System → Developer options → USB
    debugging** (tap *About phone → Build number* 7 times first). That is the only time you use
    Android's own setup.
-6. Set the R1 up as ribbitOS from your computer (installs the app as the home screen, hides the
+6. Download `ribbitos-lite-*.apk` from [Releases](https://github.com/haakon-kohler/ribbitos/releases),
+   then set the R1 up as ribbitOS from your computer (installs the app as the home screen, hides the
    navigation bar, simplifies Android's lock screen (frog picture, optional PIN), marks setup done so
    it never returns, and switches off the other apps; everything it changes is listed in the script):
    ```sh
    tools/provision.sh ribbitos-lite.apk my-r1.env   # my-r1.env: see tools/r1.example.env
    ```
+   Coming from v0.01-alpha? Run `adb uninstall dev.ribbitos.lite` first: later builds are signed
+   with a different key ([keys/README.md](keys/README.md)), and the uninstall clears the app's
+   settings, so keep `my-r1.env`.
 
 ## Build
 
-JDK 17 and the Android SDK (platform 35):
+JDK 17 and the Android SDK (platform 35, NDK 27.3.13750724, CMake 3.22.1). Clone with
+submodules (whisper.cpp); the build downloads the Whisper model (about 44 MB, checksum-pinned):
 
 ```sh
-./gradlew check assembleRelease
+git clone --recurse-submodules https://github.com/haakon-kohler/ribbitos
+cd ribbitos && ./gradlew check assembleRelease
 ```
 
 ## Credits

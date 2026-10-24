@@ -1,6 +1,7 @@
 package dev.ribbitos.lite
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Looper
 import android.view.KeyEvent
 import android.view.View
@@ -8,10 +9,14 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import dev.ribbitos.lite.camera.CameraActivity
+import dev.ribbitos.lite.camera.Photo
 import org.junit.After
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -22,6 +27,8 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.android.controller.ActivityController
 import org.robolectric.annotation.Config
+import java.io.ByteArrayOutputStream
+import java.io.File
 import java.util.concurrent.Executor
 
 @RunWith(RobolectricTestRunner::class)
@@ -302,6 +309,63 @@ class HomeActivityTest {
         launch()
         activity.findViewById<View>(R.id.settings).performClick()
         assertEquals(SettingsActivity::class.java.name, shadowOf(activity).nextStartedActivity.component?.className)
+    }
+
+    @Test
+    fun cameraButtonOpensTheCamera() {
+        launch()
+        activity.findViewById<View>(R.id.camera).performClick()
+        assertEquals(CameraActivity::class.java.name, shadowOf(activity).nextStartedActivity.component?.className)
+    }
+
+    private val inbox: File get() = File(ctx.cacheDir, CameraActivity.RESULT_FILE)
+    private val thumb: View get() = activity.findViewById(R.id.photo)
+
+    /** What the camera leaves behind: a real JPEG. */
+    private fun takePhoto(): ByteArray {
+        val out = ByteArrayOutputStream()
+        Bitmap.createBitmap(4, 3, Bitmap.Config.ARGB_8888).compress(Bitmap.CompressFormat.JPEG, Photo.QUALITY, out)
+        return out.toByteArray().also { inbox.writeBytes(it) }
+    }
+
+    @Test
+    fun aPhotoFromTheCameraGoesWithTheNextMessage() {
+        val jpeg = takePhoto()
+        launch()
+        assertEquals(View.VISIBLE, thumb.visibility)
+        assertFalse("collected once", inbox.exists())
+        send("what is it")
+        assertArrayEquals(jpeg, backend.photos.single())
+        assertEquals("\uD83D\uDCF7 what is it", texts.first())
+        assertEquals(View.GONE, thumb.visibility)
+        send("and now")
+        assertNull("the photo went with one message only", backend.photos.last())
+    }
+
+    @Test
+    fun aPhotoAloneAsksWhatItShows() {
+        takePhoto()
+        launch()
+        send("")
+        assertEquals(ctx.getString(R.string.photo_prompt), backend.sent.single().first)
+    }
+
+    @Test
+    fun tappingThePhotoDropsIt() {
+        takePhoto()
+        launch()
+        thumb.performClick()
+        assertEquals(View.GONE, thumb.visibility)
+        send("hi")
+        assertNull(backend.photos.single())
+    }
+
+    @Test
+    fun anEmptyPhotoIsIgnored() {
+        inbox.writeBytes(ByteArray(0))
+        launch()
+        assertEquals(View.GONE, thumb.visibility)
+        assertFalse(inbox.exists())
     }
 
     @Test

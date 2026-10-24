@@ -8,6 +8,13 @@
     <string name="stop">Stop</string>
     <string name="input_hint">Message</string>
     <string name="mic">Hold to talk</string>
+    <string name="camera">Camera</string>
+    <string name="take_photo">Take photo</string>
+    <string name="camera_hint">Turn the wheel to point the camera</string>
+    <string name="remove_photo">Remove photo</string>
+    <string name="photo_prompt">What do you see?</string>
+    <string name="camera_unavailable">The camera isn’t available</string>
+    <string name="motor_unavailable">This build can’t turn the camera (see keys/README.md): %1$s</string>
     <string name="listening">Listening…</string>
     <string name="transcribing">Transcribing…</string>
     <string name="not_heard">Didn’t catch that; hold the mic and try again</string>

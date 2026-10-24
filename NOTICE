@@ -33,9 +33,11 @@ ribbitOS builds on work by others.
 - OpenAI Whisper model weights (https://github.com/openai/whisper), MIT, in ggml form from
   https://huggingface.co/ggerganov/whisper.cpp: downloaded at build time and shipped in the APK.
 - Material Design icons by Google (https://github.com/google/material-design-icons), Apache
-  License 2.0 (https://www.apache.org/licenses/LICENSE-2.0): the send, stop, add, tune and mic
-  glyph paths in app/src/main/res/drawable/ic_send.xml, ic_stop.xml, ic_new.xml, ic_settings.xml and
-  ic_mic.xml.
+  License 2.0 (https://www.apache.org/licenses/LICENSE-2.0): the send, stop, add, tune, mic and
+  photo_camera glyph paths in app/src/main/res/drawable/ic_send.xml, ic_stop.xml, ic_new.xml,
+  ic_settings.xml, ic_mic.xml and ic_camera.xml.
+- AOSP's public test platform key (https://android.googlesource.com/platform/build/+/refs/heads/main/target/product/security),
+  Apache License 2.0: keys/aosp-platform.p12 and keys/platform.x509.pem (see keys/README.md).
 - r1_escape (https://github.com/RabbitHoleEscapeR1/r1_escape): the MediaTek preloader FASTBOOT
   handshake that tools/enter-fastboot.py reimplements.
 - TurboTheTurtle/rabbit-r1-firmware: R1 partition layout and hardware notes.

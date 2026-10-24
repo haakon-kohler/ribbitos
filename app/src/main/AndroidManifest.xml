@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- The frog on Android's lock screen (LockWallpaper.kt). -->
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <!-- Photos to send with a message; they go only to the chosen provider. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <!-- Cleartext is for a self-hosted OpenClaw gateway on the LAN (http://host:18789). -->
     <application
@@ -31,6 +34,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".camera.CameraActivity"
+            android:exported="false"
+            android:label="@string/camera" />
 
         <activity
             android:name=".SettingsActivity"

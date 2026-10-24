@@ -1,6 +1,7 @@
 package dev.ribbitos.lite.net
 
 import dev.ribbitos.lite.Limits
+import dev.ribbitos.lite.camera.Photo
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -8,6 +9,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.BufferedSource
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -68,6 +70,19 @@ class ChatCompletions(
     }
 
     companion object {
+        /** A user message: plain text, or text plus an `image_url` part for a photo. */
+        fun userMessage(text: String, photo: ByteArray?): JSONObject {
+            val content: Any = if (photo == null) {
+                text
+            } else {
+                val image = JSONObject().put("url", Photo.dataUri(photo))
+                JSONArray()
+                    .put(JSONObject().put("type", "text").put("text", text))
+                    .put(JSONObject().put("type", "image_url").put("image_url", image))
+            }
+            return JSONObject().put("role", "user").put("content", content)
+        }
+
         private val JSON = "application/json".toMediaType()
         private const val CONNECT_TIMEOUT_S = 10L
 

@@ -12,6 +12,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import dev.ribbitos.lite.camera.Attachment
+import dev.ribbitos.lite.camera.CameraActivity
 import dev.ribbitos.lite.voice.VoiceInput
 import java.io.File
 
@@ -24,6 +26,7 @@ class HomeActivity : Activity() {
     private val send by lazy { findViewById<ImageButton>(R.id.send) }
 
     private val voice by lazy { VoiceInput(this, input, findViewById(R.id.mic), ::runOnUiThread) }
+    private val attachment by lazy { Attachment(findViewById(R.id.photo), File(cacheDir, CameraActivity.RESULT_FILE)) }
 
     private val settingsScreen by lazy { Intent(this, SettingsActivity::class.java) }
 
@@ -44,11 +47,13 @@ class HomeActivity : Activity() {
         send.setOnClickListener { if (turn != null) turn?.stop() else submit() }
         findViewById<View>(R.id.new_chat).setOnClickListener { newChat() }
         findViewById<View>(R.id.settings).setOnClickListener { startActivity(settingsScreen) }
+        findViewById<View>(R.id.camera).setOnClickListener { startActivity(Intent(this, CameraActivity::class.java)) }
         voice.attach()
     }
 
     override fun onResume() {
         super.onResume()
+        attachment.collect()
         refreshHint()
     }
 
@@ -81,21 +86,26 @@ class HomeActivity : Activity() {
     }
 
     private fun submit() {
-        val text = input.text.toString().trim()
+        val photo = attachment.photo
+        // A photo on its own still asks something.
+        val text = input.text.toString().trim().ifEmpty { if (photo != null) getString(R.string.photo_prompt) else "" }
         val settings = Settings.load(this)
         when {
             text.isEmpty() || turn != null -> return
             !settings.configured -> startActivity(settingsScreen)
             else -> {
                 val earlier = transcript.messages.toList()
-                start(Turn(Wiring.backendFactory(settings), text, transcript.conversation, earlier), text)
+                val prompt = Prompt(text, photo)
+                start(Turn(Wiring.backendFactory(settings), prompt, transcript.conversation, earlier), prompt)
             }
         }
     }
 
-    private fun start(next: Turn, text: String) {
+    private fun start(next: Turn, prompt: Prompt) {
         input.text.clear()
-        val sent = Transcript.Message(Transcript.USER, text)
+        attachment.clear()
+        val shown = if (prompt.photo != null) PHOTO_MARK + prompt.text else prompt.text
+        val sent = Transcript.Message(Transcript.USER, shown)
         transcript.add(sent)
         chat.add(sent)
         hint.visibility = View.GONE
@@ -142,6 +152,9 @@ class HomeActivity : Activity() {
     private companion object {
         const val TRANSCRIPT_FILE = "transcript.json"
         const val THINKING = "…"
+
+        // Marks a message that carried a photo, in the chat and in the history sent later.
+        const val PHOTO_MARK = "📷 "
         const val TEXT_INPUT =
             InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
     }

@@ -15,10 +15,16 @@ class DemoBackendTest {
     @Test
     fun streamsTheReplyWordByWord() {
         val deltas = mutableListOf<String>()
-        val reply = fast.send("hi", emptyList(), "c") { deltas += it }
+        val reply = fast.send(Prompt("hi"), emptyList(), "c") { deltas += it }
         assertEquals(DemoBackend.replyTo("hi"), reply)
         assertEquals(reply, deltas.joinToString(""))
         assertTrue(deltas.size > 1)
+    }
+
+    @Test
+    fun aPhotoIsAcknowledged() {
+        val reply = fast.send(Prompt("hi", ByteArray(2048)), emptyList(), "c") {}
+        assertTrue(reply.startsWith("I got your photo (2 KB)."))
     }
 
     @Test
@@ -32,21 +38,22 @@ class DemoBackendTest {
 
     @Test
     fun errorShowsAFailure() {
-        val e = assertThrows(IOException::class.java) { fast.send("show an Error", emptyList(), "c") {} }
+        val e = assertThrows(IOException::class.java) { fast.send(Prompt("show an Error"), emptyList(), "c") {} }
         assertEquals(DemoBackend.ERROR, e.message)
     }
 
     @Test
     fun cancelStopsTheStream() {
         fast.cancel()
-        assertThrows(IOException::class.java) { fast.send("hi", emptyList(), "c") {} }
+        assertThrows(IOException::class.java) { fast.send(Prompt("hi"), emptyList(), "c") {} }
     }
 
     @Test
     fun interruptionIsAnIOExceptionAndKeepsTheFlag() {
         Thread.currentThread().interrupt()
         try {
-            assertThrows(IOException::class.java) { DemoBackend(wordDelayMs = 1).send("hi", emptyList(), "c") {} }
+            val slow = DemoBackend(wordDelayMs = 1)
+            assertThrows(IOException::class.java) { slow.send(Prompt("hi"), emptyList(), "c") {} }
             assertTrue(Thread.interrupted())
         } finally {
             Thread.interrupted()
@@ -55,7 +62,7 @@ class DemoBackendTest {
 
     @Test
     fun blankMessageIsRejected() {
-        assertThrows(IllegalArgumentException::class.java) { fast.send(" ", emptyList(), "c") {} }
+        assertThrows(IllegalArgumentException::class.java) { fast.send(Prompt(" "), emptyList(), "c") {} }
     }
 
     @Test

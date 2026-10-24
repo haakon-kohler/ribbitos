@@ -1,6 +1,7 @@
 package dev.ribbitos.lite.net
 
 import dev.ribbitos.lite.Limits
+import dev.ribbitos.lite.Prompt
 import dev.ribbitos.lite.Provider
 import dev.ribbitos.lite.Settings
 import dev.ribbitos.lite.Transcript
@@ -45,8 +46,18 @@ class OpenClawBackendTest {
         Transcript.Message(Transcript.ASSISTANT, "reply"),
     )
 
+    @Test
+    fun aPhotoGoesAsAnImagePartAfterTheText() {
+        val content = OpenClawBackend.body(settings, Prompt("what's this", byteArrayOf(1, 2, 3)), "c")
+            .getJSONArray("messages").getJSONObject(1).getJSONArray("content")
+        assertEquals("what's this", content.getJSONObject(0).getString("text"))
+        val image = content.getJSONObject(1)
+        assertEquals("image_url", image.getString("type"))
+        assertEquals("data:image/jpeg;base64,AQID", image.getJSONObject("image_url").getString("url"))
+    }
+
     private fun send(text: String = "hi", deltas: MutableList<String> = mutableListOf()) =
-        OpenClawBackend(settings).send(text, earlier, "conv-1") { deltas += it }
+        OpenClawBackend(settings).send(Prompt(text), earlier, "conv-1") { deltas += it }
 
     @Test
     fun streamsDeltasInOrderAndReturnsTheWholeReply() {
@@ -158,7 +169,7 @@ class OpenClawBackendTest {
             backend.cancel()
         }
         canceller.start()
-        assertThrows(IOException::class.java) { backend.send("hi", emptyList(), "c") {} }
+        assertThrows(IOException::class.java) { backend.send(Prompt("hi"), emptyList(), "c") {} }
         canceller.join()
     }
 
@@ -178,7 +189,7 @@ class OpenClawBackendTest {
 
     @Test
     fun blankConversationIsRejected() {
-        assertThrows(IllegalArgumentException::class.java) { OpenClawBackend.body(settings, "hi", "") }
+        assertThrows(IllegalArgumentException::class.java) { OpenClawBackend.body(settings, Prompt("hi"), "") }
     }
 
     @Test

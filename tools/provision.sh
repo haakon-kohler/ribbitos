@@ -18,9 +18,11 @@ apk=$1
 app=dev.ribbitos.lite
 
 say "Installing ribbitOS lite as the home app"
-adb install -r "${apk}" >/dev/null
+adb install -r "${apk}" >/dev/null ||
+    die "Install failed. A ribbitOS signed with another key (v0.01-alpha) must go first: adb uninstall ${app} (clears its settings)"
 adb shell cmd package set-home-activity "${app}/.HomeActivity" >/dev/null
 adb shell pm grant "${app}" android.permission.RECORD_AUDIO
+adb shell pm grant "${app}" android.permission.CAMERA
 
 say "Display sized for the 2.9-inch screen"
 adb shell wm density 190

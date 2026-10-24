@@ -14,14 +14,15 @@ class DemoBackend(private val wordDelayMs: Long = WORD_DELAY_MS) : Backend {
     private var cancelled = false
 
     override fun send(
-        text: String,
+        prompt: Prompt,
         history: List<Transcript.Message>,
         conversation: String,
         onDelta: (String) -> Unit,
     ): String {
-        require(text.isNotBlank()) { "Empty message" }
+        val text = prompt.text
         if (text.contains("error", ignoreCase = true)) throw IOException(ERROR)
-        val words = replyTo(text).split(' ')
+        val seen = prompt.photo?.let { "I got your photo (${it.size / BYTES_PER_KB} KB). " }.orEmpty()
+        val words = (seen + replyTo(text)).split(' ')
         val reply = StringBuilder()
         for (i in words.indices) {
             pause()
@@ -49,6 +50,7 @@ class DemoBackend(private val wordDelayMs: Long = WORD_DELAY_MS) : Backend {
     companion object {
         const val ERROR = "Demo error: this is how a failed reply looks."
         private const val WORD_DELAY_MS = 60L
+        private const val BYTES_PER_KB = 1024
 
         /** The canned reply for [text]. */
         fun replyTo(text: String): String = if (text.contains("long", ignoreCase = true)) {

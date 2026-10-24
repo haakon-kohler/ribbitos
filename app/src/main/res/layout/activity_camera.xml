@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Merged into the window's own frame: the preview fills it, the controls float on top. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextureView
+        android:id="@+id/preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/close"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_margin="8dp"
+        android:minWidth="0dp"
+        android:text="@string/back"
+        android:textAllCaps="false"
+        android:textColor="@color/fg"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/camera_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="104dp"
+        android:text="@string/camera_hint"
+        android:textColor="@color/fg"
+        android:textIsSelectable="false"
+        android:textSize="13sp" />
+
+    <ImageButton
+        android:id="@+id/shutter"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/shutter"
+        android:contentDescription="@string/take_photo" />
+</merge>

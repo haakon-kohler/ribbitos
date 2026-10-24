@@ -1,6 +1,7 @@
 package dev.ribbitos.lite.net
 
 import dev.ribbitos.lite.Limits
+import dev.ribbitos.lite.Prompt
 import dev.ribbitos.lite.Provider
 import dev.ribbitos.lite.Settings
 import dev.ribbitos.lite.Style
@@ -59,7 +60,7 @@ class ClaudeBackendTest {
         text: String = "hi",
         history: List<Transcript.Message> = emptyList(),
         deltas: MutableList<String> = mutableListOf(),
-    ) = ClaudeBackend(settings).send(text, history, "conv") { deltas += it }
+    ) = ClaudeBackend(settings).send(Prompt(text), history, "conv") { deltas += it }
 
     @Test
     fun streamsTheReply() {
@@ -89,6 +90,22 @@ class ClaudeBackendTest {
             (0 until m.length()).map { m.getJSONObject(it).getString("role") }
         )
         assertFalse("fallbacks only go to Anthropic's own API", body.has("fallbacks"))
+    }
+
+    @Test
+    fun aPhotoGoesAsABase64ImageBeforeTheNewestText() {
+        server.enqueue(stream("ok"))
+        ClaudeBackend(settings).send(Prompt("c", byteArrayOf(1, 2, 3)), listOf(user("a"), bot("b")), "conv") {}
+        val req = server.takeRequest(1, TimeUnit.SECONDS) ?: error("no request")
+        val m = JSONObject(req.body.readUtf8()).getJSONArray("messages")
+        assertEquals("a", m.getJSONObject(0).getString("content"))
+        val blocks = m.getJSONObject(2).getJSONArray("content")
+        val source = blocks.getJSONObject(0).getJSONObject("source")
+        assertEquals("image", blocks.getJSONObject(0).getString("type"))
+        assertEquals("base64", source.getString("type"))
+        assertEquals("image/jpeg", source.getString("media_type"))
+        assertEquals("AQID", source.getString("data"))
+        assertEquals("c", blocks.getJSONObject(1).getString("text"))
     }
 
     @Test
@@ -159,7 +176,7 @@ class ClaudeBackendTest {
             backend.cancel()
         }
         canceller.start()
-        assertThrows(IOException::class.java) { backend.send("hi", emptyList(), "c") {} }
+        assertThrows(IOException::class.java) { backend.send(Prompt("hi"), emptyList(), "c") {} }
         canceller.join()
     }
 

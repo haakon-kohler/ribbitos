@@ -10,17 +10,23 @@ import com.anthropic.errors.NotFoundException
 import com.anthropic.errors.PermissionDeniedException
 import com.anthropic.errors.RateLimitException
 import com.anthropic.errors.UnauthorizedException
+import com.anthropic.models.beta.messages.BetaBase64ImageSource
+import com.anthropic.models.beta.messages.BetaContentBlockParam
+import com.anthropic.models.beta.messages.BetaImageBlockParam
 import com.anthropic.models.beta.messages.BetaOutputConfig
 import com.anthropic.models.beta.messages.BetaRawMessageStreamEvent
 import com.anthropic.models.beta.messages.BetaStopReason
+import com.anthropic.models.beta.messages.BetaTextBlockParam
 import com.anthropic.models.beta.messages.MessageCreateParams
 import dev.ribbitos.lite.Backend
 import dev.ribbitos.lite.History
 import dev.ribbitos.lite.Limits
+import dev.ribbitos.lite.Prompt
 import dev.ribbitos.lite.Provider
 import dev.ribbitos.lite.Settings
 import dev.ribbitos.lite.Style
 import dev.ribbitos.lite.Transcript
+import dev.ribbitos.lite.camera.Photo
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.io.IOException
 
@@ -52,12 +58,12 @@ class ClaudeBackend(private val settings: Settings) : Backend {
     }
 
     override fun send(
-        text: String,
+        prompt: Prompt,
         history: List<Transcript.Message>,
         conversation: String,
         onDelta: (String) -> Unit,
     ): String {
-        val params = params(settings, History.forTurn(history, text))
+        val params = params(settings, History.forTurn(history, prompt.text), prompt.photo)
         try {
             client.beta().messages().createStreaming(params).use {
                 stream = it
@@ -117,24 +123,45 @@ class ClaudeBackend(private val settings: Settings) : Backend {
         private val FALLBACK_MODELS = listOf("claude-opus-5", "claude-fable-5-1", "claude-sonnet-5-5")
 
         /** The streaming request: style prompt, low effort for quick chat replies, the conversation. */
-        fun params(s: Settings, conversation: List<Transcript.Message>): MessageCreateParams {
+        fun params(s: Settings, conversation: List<Transcript.Message>, photo: ByteArray? = null): MessageCreateParams {
             require(conversation.firstOrNull()?.role == Transcript.USER) { "The conversation must start with the user" }
             val builder = MessageCreateParams.builder()
                 .model(s.model)
                 .maxTokens(MAX_TOKENS)
                 .system(Style.SYSTEM)
                 .outputConfig(BetaOutputConfig.builder().effort(BetaOutputConfig.Effort.LOW).build())
-            conversation.forEach {
+            conversation.dropLast(1).forEach {
                 when (it.role) {
                     Transcript.USER -> builder.addUserMessage(it.text)
                     else -> builder.addAssistantMessage(it.text)
                 }
+            }
+            val newest = conversation.last().text
+            // The photo rides only with the newest message; earlier ones are history.
+            if (photo == null) {
+                builder.addUserMessage(newest)
+            } else {
+                builder.addUserMessageOfBetaContentBlockParams(withPhoto(newest, photo))
             }
             if (takesFallbacks(s)) {
                 builder.addBeta(FALLBACK_BETA).putAdditionalBodyProperty("fallbacks", JsonValue.from("default"))
             }
             return builder.build()
         }
+
+        private fun withPhoto(text: String, photo: ByteArray): List<BetaContentBlockParam> = listOf(
+            BetaContentBlockParam.ofImage(
+                BetaImageBlockParam.builder()
+                    .source(
+                        BetaBase64ImageSource.builder()
+                            .data(Photo.base64(photo))
+                            .mediaType(BetaBase64ImageSource.MediaType.IMAGE_JPEG)
+                            .build(),
+                    )
+                    .build(),
+            ),
+            BetaContentBlockParam.ofText(BetaTextBlockParam.builder().text(text).build()),
+        )
 
         /** Refusal fallbacks only exist on Anthropic's own API, for some models. */
         fun takesFallbacks(s: Settings): Boolean =

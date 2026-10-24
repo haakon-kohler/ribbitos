@@ -1,5 +1,6 @@
 package dev.ribbitos.lite.net
 
+import dev.ribbitos.lite.Prompt
 import dev.ribbitos.lite.Provider
 import dev.ribbitos.lite.Settings
 import dev.ribbitos.lite.Style
@@ -38,11 +39,13 @@ class OpenAiBackendTest {
         return MockResponse().setHeader("Content-Type", "text/event-stream").setBody(deltas + "data: [DONE]\n\n")
     }
 
+    private fun sendHi() = OpenAiBackend(settings).send(Prompt("hi"), emptyList(), "c") {}
+
     @Test
     fun streamsTheReply() {
         server.enqueue(reply("Bon", "jour"))
         val deltas = mutableListOf<String>()
-        assertEquals("Bonjour", OpenAiBackend(settings).send("hi", emptyList(), "c") { deltas += it })
+        assertEquals("Bonjour", OpenAiBackend(settings).send(Prompt("hi"), emptyList(), "c") { deltas += it })
         assertEquals(listOf("Bon", "jour"), deltas)
     }
 
@@ -50,7 +53,7 @@ class OpenAiBackendTest {
     fun sendsTheKeyModelStyleAndTheConversation() {
         server.enqueue(reply("ok"))
         val earlier = listOf(user("a"), bot("b"), Transcript.Message(Transcript.ASSISTANT, "boom", error = true))
-        OpenAiBackend(settings).send("c", earlier, "conv") {}
+        OpenAiBackend(settings).send(Prompt("c"), earlier, "conv") {}
         val req = server.takeRequest(1, TimeUnit.SECONDS) ?: error("no request")
         assertEquals("/v1/chat/completions", req.path)
         assertEquals("Bearer sk-test", req.getHeader("Authorization"))
@@ -66,16 +69,26 @@ class OpenAiBackendTest {
     }
 
     @Test
+    fun aPhotoRidesOnlyWithTheNewestMessage() {
+        val m = OpenAiBackend.body(settings, listOf(user("a"), bot("b"), user("c")), byteArrayOf(1, 2, 3))
+            .getJSONArray("messages")
+        assertEquals("a", m.getJSONObject(1).getString("content"))
+        val parts = m.getJSONObject(3).getJSONArray("content")
+        assertEquals("c", parts.getJSONObject(0).getString("text"))
+        assertEquals("data:image/jpeg;base64,AQID", parts.getJSONObject(1).getJSONObject("image_url").getString("url"))
+    }
+
+    @Test
     fun notFoundSuggestsCheckingTheModel() {
         server.enqueue(MockResponse().setResponseCode(404).setBody("""{"error":{"message":"no such model"}}"""))
-        val e = assertThrows(IOException::class.java) { OpenAiBackend(settings).send("hi", emptyList(), "c") {} }
+        val e = assertThrows(IOException::class.java) { sendHi() }
         assertEquals("Not found (HTTP 404): check the URL and the model name", e.message)
     }
 
     @Test
     fun rateLimitUsesTheServersMessage() {
         server.enqueue(MockResponse().setResponseCode(429).setBody("""{"error":{"message":"Rate limit reached"}}"""))
-        val e = assertThrows(IOException::class.java) { OpenAiBackend(settings).send("hi", emptyList(), "c") {} }
+        val e = assertThrows(IOException::class.java) { sendHi() }
         assertEquals("Rate limit reached", e.message)
     }
 
