@@ -24,8 +24,9 @@ import java.io.IOException
 
 /**
  * Full-screen camera: the wheel flips the R1's camera ([Motor]), the shutter takes a photo, and the
- * JPEG is left in the cache as [RESULT_FILE] for the chat to collect. Hardware-facing, so tested on
- * the R1; the rules it follows ([Photo], [Motor]) are unit-tested.
+ * JPEG is left in the cache as [RESULT_FILE] for the chat to collect. Leaving the screen (locking
+ * the R1 included) turns the camera back down. Hardware-facing, so tested on the R1; the rules it
+ * follows ([Photo], [Motor]) are unit-tested.
  */
 class CameraActivity : Activity() {
     private val preview by lazy { findViewById<TextureView>(R.id.preview) }
@@ -65,7 +66,10 @@ class CameraActivity : Activity() {
     }
 
     override fun onPause() {
-        handler.post { lens.close() }
+        handler.post {
+            lens.close()
+            aim { Motor.DOWN }
+        }
         super.onPause()
     }
 
@@ -82,7 +86,7 @@ class CameraActivity : Activity() {
         }
         if (event.action == KeyEvent.ACTION_DOWN && event.eventTime - flippedAt >= TURN_MS) {
             flippedAt = event.eventTime
-            handler.post { aim(flip = true) }
+            handler.post { aim(Motor::flipped) }
         }
         return true
     }
@@ -90,15 +94,15 @@ class CameraActivity : Activity() {
     private fun open(texture: SurfaceTexture) {
         handler.post {
             lens.open(texture)
-            aim(flip = false)
+            aim(Motor::ready)
         }
     }
 
-    /** Flips the camera, or settles it at its nearest end, and keeps the preview upright. */
-    private fun aim(flip: Boolean) {
+    /** Turns the camera from where it is to [where] it should go, and keeps the preview upright. */
+    private fun aim(where: (Int) -> Int) {
         try {
             val now = motor.angle
-            val angle = if (flip) Motor.flipped(now) else Motor.rest(now)
+            val angle = where(now)
             if (angle != now) motor.turnTo(angle)
             val upright = if (Motor.facesUser(angle)) HALF_TURN else 0f
             runOnUiThread { preview.rotation = upright }

@@ -21,20 +21,20 @@ class MotorTest {
     fun aNotchFlipsItAllTheWayRound() {
         assertEquals(Motor.MIN, Motor.flipped(Motor.MAX))
         assertEquals(Motor.MAX, Motor.flipped(Motor.MIN))
-        assertEquals("pointing up, it flips to the user", Motor.MIN, Motor.flipped(Motor.UP))
+        assertEquals("from down, it flips to the user", Motor.MIN, Motor.flipped(Motor.DOWN))
     }
 
     @Test
-    fun itRestsAtTheNearestEnd() {
-        assertEquals(Motor.MAX, Motor.rest(Motor.UP))
-        assertEquals(Motor.MIN, Motor.rest(Motor.UP - 1))
-        assertEquals(Motor.MAX, Motor.rest(Motor.MAX))
+    fun itOpensAtTheNearestEndAndFromDownLooksAway() {
+        assertEquals(Motor.MAX, Motor.ready(Motor.DOWN))
+        assertEquals(Motor.MIN, Motor.ready(Motor.DOWN - 1))
+        assertEquals(Motor.MAX, Motor.ready(Motor.MAX))
     }
 
     @Test
-    fun overTheTopItFacesTheUser() {
+    fun pastDownItFacesTheUser() {
         assertTrue(Motor.facesUser(Motor.MIN))
-        assertFalse(Motor.facesUser(Motor.UP))
+        assertFalse(Motor.facesUser(Motor.DOWN))
         assertFalse(Motor.facesUser(Motor.MAX))
     }
 

@@ -24,10 +24,10 @@ class PhotoTest {
     }
 
     @Test
-    fun lookingAwayTheSensorsMountingIsUpright() = assertEquals(90, Photo.uprightDegrees(90, Motor.UP))
+    fun lookingAwayTheSensorsMountingIsUpright() = assertEquals(90, Photo.uprightDegrees(90, Motor.DOWN))
 
     @Test
-    fun facingTheUserItFlips() = assertEquals(270, Photo.uprightDegrees(90, Motor.UP - 1))
+    fun facingTheUserItFlips() = assertEquals(270, Photo.uprightDegrees(90, Motor.DOWN - 1))
 
     @Test
     fun aFlipWrapsAround() = assertEquals(90, Photo.uprightDegrees(270, Motor.MIN))

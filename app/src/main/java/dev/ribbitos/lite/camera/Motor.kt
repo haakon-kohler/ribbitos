@@ -5,7 +5,7 @@ import java.io.IOException
 
 /**
  * The R1's rotating camera. Angles are degrees, [MIN] to [MAX]: at [MAX] it looks away from the
- * user, at [MIN] it has swung over the top to look at them.
+ * user, at [DOWN] into the R1, and at [MIN] at the user.
  */
 interface Motor {
     /** Where the camera points now. */
@@ -19,17 +19,17 @@ interface Motor {
         const val MIN = 0
         const val MAX = 180
 
-        /** Straight up. */
-        const val UP = 90
+        /** Lens down, into the R1: where the camera waits whenever it isn't in use. */
+        const val DOWN = 90
 
-        /** Where the camera rests: the end of its travel nearest [angle]. */
-        fun rest(angle: Int): Int = if (facesUser(angle)) MIN else MAX
+        /** Where the camera opens: the end of its travel nearest [angle]; from [DOWN], looking away. */
+        fun ready(angle: Int): Int = if (facesUser(angle)) MIN else MAX
 
         /** The other end: one wheel notch turns the camera all the way round. */
         fun flipped(angle: Int): Int = if (facesUser(angle)) MAX else MIN
 
-        /** Past [UP] towards the user the camera sees the world upside down. */
-        fun facesUser(angle: Int): Boolean = angle < UP
+        /** Past [DOWN] towards the user the camera sees the world upside down. */
+        fun facesUser(angle: Int): Boolean = angle < DOWN
     }
 }
 
