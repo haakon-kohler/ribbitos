@@ -1,9 +1,9 @@
-# ribbitOS 🐸
+# RibbitOS 🐸
 
 **A free, open-source replacement for rabbitOS on the Rabbit R1.**
 
-Your R1, talking to the AI you choose: your own [OpenClaw](https://docs.openclaw.ai) agent, OpenAI,
-or Claude. No rabbit account, no cloud in between, MIT-licensed.
+A FOSS operating system for your R1, talking to your own [OpenClaw](https://docs.openclaw.ai) agent, OpenAI,
+or Claude. No OS3 account or third party cloud, and it's MIT-licensed!
 
 <p>
   <img src="docs/images/chat.png" width="240" alt="ribbitOS chat screen on the R1">
@@ -11,8 +11,8 @@ or Claude. No rabbit account, no cloud in between, MIT-licensed.
   <img src="docs/images/power.png" width="240" alt="Holding the button brings up power off and restart">
 </p>
 
-> **v0.01-alpha.** Text chat works end to end on a real R1. Voice typing, sending a photo from the
-> camera, and a lock screen are next, for v0.01. Not accepting contributions yet.
+> **v0.01-alpha.** Text chat works end to end! Voice typing, sending a photo from the
+> camera, and a lock screen are next. We are not yet accepting contributions (though maybe soon. Open a pull request!)
 
 ## Features
 
@@ -26,10 +26,17 @@ or Claude. No rabbit account, no cloud in between, MIT-licensed.
 - **Built strictly:** NASA "Power of Ten" rules, every lint check on with zero warnings, 150+ tests,
   all enforced in CI ([docs/RULES.md](docs/RULES.md)).
 
+## RibbitOS Lite vs. RibbitOS
+
+If you would like a more fully featured, complete option with a more polished UI and functionality, use RabbitOS (coming soon.)
+
+RibbitOS lite is built to be a dead simple integration of the R1's functionality while giving access to cloud models.
+The goal with lite was to create a platform to make your own apps and integrations off of!
+
 ## Install
 
-You need an R1, a computer with `adb`/`fastboot`, and about an hour. Unlocking voids the R1's
-warranty, and a bad flash can brick it.
+You need an R1, a computer with `adb`/`fastboot`, and about an hour. **Unlocking voids the R1's
+warranty, and a bad flash can permanently destroy it. We are not responsible for any broken devices, USE AT YOUR OWN RISK.**
 
 1. In rabbit's OS3: **settings → r1 →** developer mode, then **device modification → unlock**.
 2. Back up the R1: `tools/backup.sh` (needs [mtkclient](https://github.com/bkerler/mtkclient)).
@@ -40,8 +47,8 @@ warranty, and a bad flash can brick it.
    debugging** (tap *About phone → Build number* 7 times first). That is the only time you use
    Android's own setup.
 6. Set the R1 up as ribbitOS from your computer (installs the app as the home screen, hides the
-   navigation bar, simplifies Android's lock screen (frog picture, optional PIN), marks setup done so
-   it never returns, and switches off the other apps; everything it changes is listed in the script):
+   navigation bar and Android's lock screen, marks setup done so it never returns, and switches off
+   the other apps; everything it changes is listed in the script):
    ```sh
    tools/provision.sh ribbitos-lite.apk my-r1.env   # my-r1.env: see tools/r1.example.env
    ```
