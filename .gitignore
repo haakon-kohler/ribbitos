@@ -9,3 +9,4 @@ build/
 *.img.gz
 *.zip
 .cxx/
+/dist/

@@ -33,6 +33,7 @@ your fork, and assign a fake in tests, the way `HomeActivityTest` does.
 | Lock screen picture | `res/drawable/lock_screen.xml`, `LockWallpaper.kt` | edit the drawable, bump `LockWallpaper.VERSION` |
 | Settings and keys | `Settings.kt`, `ConfigReceiver.kt` | push them over adb (below) |
 | Text size | `TextSize.kt` | its sizes; picked in settings or over adb |
+| Updates | `update/` (`Feed.DEFAULT`, `res/raw/update_key.pem`) | your feed and release key; [UPDATES.md](UPDATES.md) |
 | What Android shows and runs, its colours, the keyboard | `tools/provision.sh`, `tools/debloat.txt` | edit, re-run |
 
 **Buttons.** The scroll wheel sends DPAD up/down: the chat scrolls with it
@@ -53,8 +54,8 @@ adb shell am broadcast -a dev.ribbitos.lite.CONFIG -n dev.ribbitos.lite/.ConfigR
 ## The security model
 
 - **Only ribbitOS touches the hardware.** Its camera and settings screens aren't exported, and it
-  offers no service, provider or intent that lets another app record, take a photo or turn the
-  camera.
+  offers no service, provider or intent that lets another app record, take a photo, turn the
+  camera or install anything.
 - **Settings come from you.** `ConfigReceiver` accepts broadcasts only from senders holding `DUMP`:
   adb's shell and root, not apps.
 - **Permissions are Android's own.** `RECORD_AUDIO` and `CAMERA` are runtime permissions;
@@ -64,6 +65,8 @@ adb shell am broadcast -a dev.ribbitos.lite.CONFIG -n dev.ribbitos.lite/.ConfigR
   with AOSP's public test platform key, which the LineageOS GSI is also signed with
   ([keys/README.md](../keys/README.md)). That key is public, so on this GSI any APK signed with it
   is a platform app too: install only APKs you built or trust.
+- **Updates must be signed by the release key.** The platform key is public, so it can't vouch
+  for an update; a signed `update.json` naming the APK's SHA-256 does ([UPDATES.md](UPDATES.md)).
 - **Keys stay on the device**, in the app's private storage. Never put one in the build
   ([RULES.md](RULES.md) rule 7).
 

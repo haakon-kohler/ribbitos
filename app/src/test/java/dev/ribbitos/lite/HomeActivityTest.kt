@@ -1,7 +1,12 @@
 package dev.ribbitos.lite
 
+import android.Manifest.permission.ACCESS_NETWORK_STATE
+import android.Manifest.permission.RECEIVE_BOOT_COMPLETED
+import android.app.job.JobScheduler
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.NetworkCapabilities
 import android.os.Looper
 import android.util.TypedValue
 import android.view.KeyEvent
@@ -12,6 +17,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import dev.ribbitos.lite.camera.CameraActivity
 import dev.ribbitos.lite.camera.Photo
+import dev.ribbitos.lite.update.UpdateJob
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -380,6 +386,26 @@ class HomeActivityTest {
         assertTrue(bubbles.all { it.textSize == px })
         send("again")
         assertEquals(px, bubbles.last().textSize)
+    }
+
+    @Test
+    fun theUpdateCheckIsScheduledOnceForWiFiAndIdle() {
+        launch()
+        controller.pause().stop().destroy()
+        controller = Robolectric.buildActivity(HomeActivity::class.java).setup()
+        val jobs = ctx.getSystemService(JobScheduler::class.java).allPendingJobs
+        val job = jobs.single()
+        assertEquals(UpdateJob.ID, job.id)
+        assertEquals(true, job.requiredNetwork?.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED))
+        assertTrue(job.isRequireDeviceIdle && job.isPersisted && job.isPeriodic)
+    }
+
+    @Test
+    fun theManifestAsksForWhatTheUpdateJobNeeds() {
+        // Android refuses a Wi-Fi or persisted job without these, and the home screen would crash.
+        val info = ctx.packageManager.getPackageInfo(ctx.packageName, PackageManager.GET_PERMISSIONS)
+        val asked = info.requestedPermissions.orEmpty().toSet()
+        assertTrue(asked.containsAll(listOf(ACCESS_NETWORK_STATE, RECEIVE_BOOT_COMPLETED)))
     }
 
     @Test

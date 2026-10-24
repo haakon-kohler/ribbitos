@@ -31,8 +31,8 @@ android {
         // The R1 runs Android 13 (stock rabbitOS) or 14 (LineageOS 21 GSI).
         minSdk = 33
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.01-alpha"
+        versionCode = 2
+        versionName = "0.01"
         // The R1 is arm64; building only that keeps whisper.cpp's native build and the APK small.
         ndk { abiFilters += "arm64-v8a" }
     }
@@ -142,6 +142,9 @@ kover {
                     // The camera screen and Camera2; their rules (Photo, Motor) are covered.
                     "dev.ribbitos.lite.camera.CameraActivity*",
                     "dev.ribbitos.lite.camera.Lens*",
+                    // Android's package installer and job scheduler; Feed, Release, Updater are covered.
+                    "dev.ribbitos.lite.update.Installer*",
+                    "dev.ribbitos.lite.update.UpdateJob*",
                 )
             }
         }

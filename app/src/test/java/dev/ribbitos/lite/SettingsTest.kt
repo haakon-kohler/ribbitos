@@ -2,6 +2,7 @@ package dev.ribbitos.lite
 
 import android.content.Context
 import android.content.Intent
+import dev.ribbitos.lite.update.Feed
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -120,6 +121,15 @@ class SettingsTest {
         TextSize.LARGE.save(ctx)
         ConfigReceiver().onReceive(ctx, Intent(ACTION).putExtra(TextSize.KEY, "huge"))
         assertEquals(TextSize.LARGE, TextSize.load(ctx))
+    }
+
+    @Test
+    fun theUpdateFeedIsTheReleasesUntilSetOverAdb() {
+        assertEquals(Feed.DEFAULT, Feed.url(ctx))
+        ConfigReceiver().onReceive(ctx, Intent(ACTION).putExtra(Feed.SETTING, " http://lan:8765/ "))
+        assertEquals("http://lan:8765/", Feed.url(ctx))
+        ConfigReceiver().onReceive(ctx, Intent(ACTION).putExtra(Feed.SETTING, ""))
+        assertEquals(Feed.DEFAULT, Feed.url(ctx))
     }
 
     private companion object {

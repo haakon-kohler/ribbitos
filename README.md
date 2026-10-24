@@ -11,8 +11,8 @@ or Claude. No rabbit account, no cloud in between, MIT-licensed.
   <img src="docs/images/power.png" width="240" alt="Holding the button brings up power off and restart">
 </p>
 
-> **v0.01-alpha.** Text chat, voice typing, sending a photo from the camera and a simplified lock
-> screen work end to end on a real R1. Not accepting contributions yet.
+> **v0.01.** Text chat, voice typing, sending a photo from the camera, a simplified lock screen
+> and updates work end to end on a real R1. Not accepting contributions yet.
 
 ## Features
 
@@ -24,6 +24,8 @@ or Claude. No rabbit account, no cloud in between, MIT-licensed.
   shutter sends what it sees with your next message.
 - **Made for a 2.9-inch screen:** one conversation, replies stream in as they're written, a stop
   button, the scroll wheel scrolls, full screen with nothing else in the way.
+- **Updates itself** from GitHub releases, quietly, while you're not using it. Every update is
+  signed with the release key ([docs/UPDATES.md](docs/UPDATES.md)).
 - **Your keys stay on your R1.** Set them on the device, or push them from a computer over USB so
   nobody types an API key on a tiny keyboard.
 - **Easy to extend:** one small `Backend` interface; adding a provider doesn't touch the screens.

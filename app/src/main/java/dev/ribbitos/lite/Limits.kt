@@ -28,4 +28,10 @@ object Limits {
 
     /** Longest voice recording; the microphone stops by itself after this. */
     const val MAX_RECORD_SECONDS = 30
+
+    /** Largest update.json, or its signature, read from an update feed. */
+    const val MAX_UPDATE_MANIFEST_BYTES = 4_096L
+
+    /** Largest APK downloaded as an update (ribbitOS lite is about 60 MB, mostly the voice model). */
+    const val MAX_UPDATE_APK_BYTES = 200_000_000L
 }

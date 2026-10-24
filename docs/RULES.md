@@ -23,6 +23,8 @@ ruff check tools/ && ruff format --check tools/   # the tools (ruff.toml)
    - `app/build.gradle.kts` (`lint {}`, `packaging {}`): lint checks that depend on today's date,
      the synthetic-accessor check, duplicate license files in dependencies
    - `app/lint.xml`: two dependency jars exempt from `InvalidPackage`
+   - `app/src/main/AndroidManifest.xml`: two platform-only permissions (`ProtectedPermissions`) for
+     installing updates (docs/UPDATES.md)
    - `app/proguard-rules.pro`: R8 keep rules for the Anthropic SDK
    - `ruff.toml`, `.shellcheckrc`: script linting
 
@@ -40,7 +42,8 @@ ruff check tools/ && ruff format --check tools/   # the tools (ruff.toml)
    other libraries reach by reflection (Jackson inside the Anthropic SDK did) in ways no JVM test
    sees. Before a release, install `app/build/outputs/apk/release/app-release.apk` on an R1 and send
    one message through each provider. An invalid key is enough: the provider's own "rejected the
-   key" error proves the request was built, sent and its answer parsed.
+   key" error proves the request was built, sent and its answer parsed. Then update an R1 to it
+   from a local feed (docs/UPDATES.md), and publish it with `tools/release.py`.
 
 6. **Pinned versions.** Dependencies use exact versions. GitHub Actions are pinned to full commit
    SHAs of releases that were at least two weeks old when pinned. Linters in CI use the exact versions

@@ -8,10 +8,15 @@ ribbitOS lite signs with it because the LineageOS GSI it runs on is signed with 
 (certificate SHA-256 `c8a2e9bccf597c2fb6dc66bee293fc13f2fc47ec77bc6b2b0d52c11f51192ab8`; check
 yours with `apksigner verify --print-certs` on `/system/priv-app/Settings/Settings.apk`). An app
 signed with the platform key runs as a "platform app", and rabbit's vendor SELinux policy lets
-platform apps turn the R1's camera motor (`sysfs_motor`). Nothing else ribbitOS does needs it.
+platform apps turn the R1's camera motor (`sysfs_motor`), and Android lets platform apps install
+updates without asking (docs/UPDATES.md).
 
-On an OS signed with its own private keys, this key grants nothing; the camera then can't turn and
-ribbitOS says so. Refresh it with:
+On an OS signed with its own private keys, this key grants nothing; the camera then can't turn,
+updates have to be installed by hand, and ribbitOS says so.
+
+Because this key is public, it can't vouch for an update. That is the job of the **release key**:
+its public half is `app/src/main/res/raw/update_key.pem`, its private half stays with whoever
+publishes releases and never enters this repository ([docs/UPDATES.md](../docs/UPDATES.md)). Refresh it with:
 
     base=https://android.googlesource.com/platform/build/+/refs/heads/main/target/product/security
     curl -s "$base/platform.x509.pem?format=TEXT" | base64 -d > platform.x509.pem

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Voice typing: audio is transcribed on the R1 itself and never leaves it. -->
@@ -9,6 +10,16 @@
     <!-- Photos to send with a message; they go only to the chosen provider. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <!-- Updates itself without asking (update/UpdateJob.kt). Only platform apps get this, and
+         ribbitOS is one (keys/README.md); on any other OS it's simply not granted. -->
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES" tools:ignore="ProtectedPermissions" />
+    <!-- Back to the home screen once an update is in (Installer.Replaced); also platform-only. -->
+    <uses-permission
+        android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"
+        tools:ignore="ProtectedPermissions" />
+    <!-- Keeps the update check scheduled across restarts, and waiting for Wi-Fi. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!-- Cleartext is for a self-hosted OpenClaw gateway on the LAN (http://host:18789). -->
     <application
@@ -45,6 +56,23 @@
             android:exported="false"
             android:label="@string/settings"
             android:windowSoftInputMode="adjustResize" />
+
+        <service
+            android:name=".update.UpdateJob"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <receiver
+            android:name=".update.Installer$Result"
+            android:exported="false" />
+
+        <receiver
+            android:name=".update.Installer$Replaced"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Gateway settings over adb; only senders holding DUMP (adb shell, root) can reach it. -->
         <receiver

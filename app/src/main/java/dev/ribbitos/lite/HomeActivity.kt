@@ -14,6 +14,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import dev.ribbitos.lite.camera.Attachment
 import dev.ribbitos.lite.camera.CameraActivity
+import dev.ribbitos.lite.update.UpdateJob
 import dev.ribbitos.lite.voice.VoiceInput
 import java.io.File
 
@@ -38,6 +39,7 @@ class HomeActivity : Activity() {
         setContentView(R.layout.activity_home)
         Screen.immersive(this)
         LockWallpaper.applyOnce(this)
+        UpdateJob.schedule(this)
         transcript.messages.forEach { chat.add(it) }
 
         // Wraps like a multi-line field, but the keyboard's action key sends.
