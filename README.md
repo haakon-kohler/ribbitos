@@ -1,9 +1,9 @@
-# ribbitOS 🐸
+# RibbitOS 🐸
 
 **A free, open-source replacement for rabbitOS on the Rabbit R1.**
 
-Your R1, talking to the AI you choose: your own [OpenClaw](https://docs.openclaw.ai) agent, OpenAI,
-or Claude. No rabbit account, no cloud in between, MIT-licensed.
+A FOSS operating system for your R1, talking to your own [OpenClaw](https://docs.openclaw.ai) agent, OpenAI,
+or Claude. No OS3 account or third party cloud, and it's MIT-licensed!
 
 <p>
   <img src="docs/images/chat.png" width="240" alt="ribbitOS chat screen on the R1">
@@ -11,32 +11,37 @@ or Claude. No rabbit account, no cloud in between, MIT-licensed.
   <img src="docs/images/power.png" width="240" alt="Holding the button brings up power off and restart">
 </p>
 
-> **v0.01.** Text chat, voice typing, sending a photo from the camera, a simplified lock screen
-> and updates work end to end on a real R1. Not accepting contributions yet.
+> **v0.01.** Text chat, voice typing, sending a photo from the camera, a lock screen and updates
+> all work end to end! We are not yet accepting contributions (though maybe soon. Open a pull request!)
 
 ## Features
 
-- **Pick who answers:** OpenClaw (self-hosted agent), OpenAI (or any server that speaks its Chat
+- **Model-agnostic:** OpenClaw (self-hosted agent), OpenAI (or any server that speaks its Chat
   Completions API), Claude, or a built-in demo that needs no server at all.
 - **Voice typing on the R1 itself:** tap the mic, speak, and the words land in the text box.
   Whisper runs on the device; no audio leaves it ([docs/VOICE.md](docs/VOICE.md)).
 - **Photos from the rotating camera:** one notch of the wheel flips it to face you or away, the
   shutter sends what it sees with your next message.
-- **Made for a 2.9-inch screen:** one conversation, replies stream in as they're written, a stop
-  button, the scroll wheel scrolls, full screen with nothing else in the way.
 - **Updates itself** from GitHub releases, quietly, while you're not using it. Every update is
   signed with the release key ([docs/UPDATES.md](docs/UPDATES.md)).
-- **Your keys stay on your R1.** Set them on the device, or push them from a computer over USB so
+- **Customized for smaller screen:** one conversation, replies stream in as they're written, a stop
+  button, the scroll wheel scrolls, full screen with nothing else in the way.
+- **Keys kept local:** Set them on the device, or push them from a computer over USB so
   nobody types an API key on a tiny keyboard.
-- **Easy to extend:** one small `Backend` interface; adding a provider doesn't touch the screens.
+- **Easy extensibility:** one small `Backend` interface. Adding a provider doesn't touch the screens.
   Each device part is a small swappable module ([docs/MODDING.md](docs/MODDING.md)).
-- **Built strictly:** NASA "Power of Ten" rules, every lint check on with zero warnings, 200+ tests,
-  all enforced in CI ([docs/RULES.md](docs/RULES.md)).
+
+## RibbitOS Lite vs. RibbitOS
+
+If you would like a more fully featured, complete option with a more polished UI and functionality, use RibbitOS (coming soon.)
+
+RibbitOS lite is built to be a dead simple integration of the R1's functionality while giving access to cloud models.
+The goal with lite was to create a platform to make your own apps and integrations off of!
 
 ## Install
 
-You need an R1, a computer with `adb`/`fastboot`, and about an hour. Unlocking voids the R1's
-warranty, and a bad flash can brick it.
+You need an R1, a computer with `adb`/`fastboot`, and about an hour. **Unlocking voids the R1's
+warranty, and a bad flash can permanently destroy it. We are not responsible for any broken devices, USE AT YOUR OWN RISK.**
 
 1. In rabbit's OS3: **settings → r1 →** developer mode, then **device modification → unlock**.
 2. Back up the R1: `tools/backup.sh` (needs [mtkclient](https://github.com/bkerler/mtkclient)).
@@ -48,8 +53,8 @@ warranty, and a bad flash can brick it.
    Android's own setup.
 6. Download `ribbitos-lite-*.apk` from [Releases](https://github.com/haakon-kohler/ribbitos/releases),
    then set the R1 up as ribbitOS from your computer (installs the app as the home screen, hides the
-   navigation bar, simplifies Android's lock screen (frog picture, optional PIN), marks setup done so
-   it never returns, and switches off the other apps; everything it changes is listed in the script):
+   navigation bar, simplifies Android's lock screen, marks setup done so it never returns, and
+   switches off the other apps; everything it changes is listed in the script):
    ```sh
    tools/provision.sh ribbitos-lite.apk my-r1.env   # my-r1.env: see tools/r1.example.env
    ```
