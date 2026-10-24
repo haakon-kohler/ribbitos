@@ -20,7 +20,7 @@ or Claude. No OS3 account or third party cloud, and it's MIT-licensed!
   Completions API), Claude, or a built-in demo that needs no server at all.
 - **Customized for smaller sreen:** one conversation, replies stream in as they're written, a stop
   button, the scroll wheel scrolls, full screen with nothing else in the way.
-- **Keys Kept local** Set them on the device, or push them from a computer over USB so
+- **Keys kept local** Set them on the device, or push them from a computer over USB so
   nobody types an API key on a tiny keyboard.
 - **Easy extensibility** one small `Backend` interface. Adding a provider doesn't touch the screens.
 
