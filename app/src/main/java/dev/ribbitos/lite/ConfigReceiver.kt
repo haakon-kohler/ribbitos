@@ -10,6 +10,7 @@ import android.util.Log
  *
  *   adb shell am broadcast -a dev.ribbitos.lite.CONFIG -n dev.ribbitos.lite/.ConfigReceiver \
  *     --es provider claude --es token <api key> [--es base_url <url>] [--es model <model>]
+ *     [--es text_size small|medium|large]
  *
  * `provider` (demo, openclaw, openai, claude) picks which provider the other extras apply to and
  * makes it the active one; without it they apply to the active provider. Omitted extras keep their
@@ -17,6 +18,10 @@ import android.util.Log
  */
 class ConfigReceiver : BroadcastReceiver() {
     override fun onReceive(ctx: Context, intent: Intent) {
+        intent.getStringExtra(TextSize.KEY)?.let { id ->
+            val size = TextSize.find(id)
+            if (size == null) Log.w(TAG, "Unknown text size \"$id\"") else size.save(ctx)
+        }
         val requested = intent.getStringExtra(Settings.PROVIDER)
         val provider = if (requested == null) Settings.load(ctx).provider else Provider.find(requested)
         if (provider == null) {

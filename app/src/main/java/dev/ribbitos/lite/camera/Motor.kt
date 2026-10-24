@@ -19,14 +19,14 @@ interface Motor {
         const val MIN = 0
         const val MAX = 180
 
-        /** One wheel notch. */
-        const val STEP = 15
-
         /** Straight up. */
         const val UP = 90
 
-        /** Where [steps] wheel notches from [current] land, kept within [MIN]..[MAX]. */
-        fun next(current: Int, steps: Int): Int = (current + steps * STEP).coerceIn(MIN, MAX)
+        /** Where the camera rests: the end of its travel nearest [angle]. */
+        fun rest(angle: Int): Int = if (facesUser(angle)) MIN else MAX
+
+        /** The other end: one wheel notch turns the camera all the way round. */
+        fun flipped(angle: Int): Int = if (facesUser(angle)) MAX else MIN
 
         /** Past [UP] towards the user the camera sees the world upside down. */
         fun facesUser(angle: Int): Boolean = angle < UP

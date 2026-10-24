@@ -32,10 +32,12 @@ your fork, and assign a fake in tests, the way `HomeActivityTest` does.
 | Bounds (lengths, timeouts) | `Limits.kt` | its constants |
 | Lock screen picture | `res/drawable/lock_screen.xml`, `LockWallpaper.kt` | edit the drawable, bump `LockWallpaper.VERSION` |
 | Settings and keys | `Settings.kt`, `ConfigReceiver.kt` | push them over adb (below) |
-| What Android shows and runs | `tools/provision.sh`, `tools/debloat.txt` | edit, re-run |
+| Text size | `TextSize.kt` | its sizes; picked in settings or over adb |
+| What Android shows and runs, its colours, the keyboard | `tools/provision.sh`, `tools/debloat.txt` | edit, re-run |
 
 **Buttons.** The scroll wheel sends DPAD up/down: the chat scrolls with it
-(`HomeActivity.dispatchKeyEvent`), the camera turns with it (`CameraActivity.dispatchKeyEvent`).
+(`HomeActivity.dispatchKeyEvent`), and in the camera one notch flips the camera round
+(`CameraActivity.dispatchKeyEvent`).
 The side button is Android's power key: a press locks, a hold opens the power menu. The R1 has no
 other keys.
 

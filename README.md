@@ -20,8 +20,8 @@ or Claude. No rabbit account, no cloud in between, MIT-licensed.
   Completions API), Claude, or a built-in demo that needs no server at all.
 - **Voice typing on the R1 itself:** tap the mic, speak, and the words land in the text box.
   Whisper runs on the device; no audio leaves it ([docs/VOICE.md](docs/VOICE.md)).
-- **Photos from the rotating camera:** the wheel turns it, the shutter sends what it sees with
-  your next message.
+- **Photos from the rotating camera:** one notch of the wheel flips it to face you or away, the
+  shutter sends what it sees with your next message.
 - **Made for a 2.9-inch screen:** one conversation, replies stream in as they're written, a stop
   button, the scroll wheel scrolls, full screen with nothing else in the way.
 - **Your keys stay on your R1.** Set them on the device, or push them from a computer over USB so

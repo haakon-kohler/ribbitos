@@ -10,7 +10,7 @@
     <string name="mic">Hold to talk</string>
     <string name="camera">Camera</string>
     <string name="take_photo">Take photo</string>
-    <string name="camera_hint">Turn the wheel to point the camera</string>
+    <string name="camera_hint">Turn the wheel to flip the camera</string>
     <string name="remove_photo">Remove photo</string>
     <string name="photo_prompt">What do you see?</string>
     <string name="camera_unavailable">The camera isn’t available</string>
@@ -22,6 +22,10 @@
     <string name="hint_unconfigured">Not set up yet: open settings to add a key or a gateway.</string>
     <string name="back">‹ Back</string>
     <string name="android_settings">Android settings (Wi-Fi, sound, display) ›</string>
+    <string name="text_size">Text size</string>
+    <string name="text_small">Small</string>
+    <string name="text_medium">Medium</string>
+    <string name="text_large">Large</string>
     <string name="provider">Talk to</string>
     <string name="provider_demo">Demo</string>
     <string name="provider_openclaw">OpenClaw</string>

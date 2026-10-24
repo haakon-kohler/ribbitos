@@ -8,6 +8,4 @@
     <color name="bubble_outline">#B37B16</color>
     <color name="error">#FF5C5C</color>
     <color name="field">#1A1A1A</color>
-    <!-- The frog stays green whatever the accent: launcher icon, lock screen. -->
-    <color name="frog">#7BD34A</color>
 </resources>

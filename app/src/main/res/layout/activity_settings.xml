@@ -45,6 +45,20 @@
             android:paddingHorizontal="4dp"
             android:paddingBottom="12dp">
 
+            <TextView style="@style/Label" android:text="@string/text_size" />
+
+            <RadioGroup
+                android:id="@+id/text_size"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <RadioButton android:id="@+id/text_small" style="@style/Segment" android:text="@string/text_small" />
+                <RadioButton android:id="@+id/text_medium" style="@style/Segment" android:text="@string/text_medium" />
+                <RadioButton android:id="@+id/text_large" style="@style/Segment" android:text="@string/text_large" />
+            </RadioGroup>
+
             <TextView style="@style/Label" android:text="@string/provider" />
 
             <RadioGroup

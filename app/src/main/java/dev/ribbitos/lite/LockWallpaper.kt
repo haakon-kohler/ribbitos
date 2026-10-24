@@ -14,7 +14,7 @@ import java.io.IOException
  */
 object LockWallpaper {
     /** Bump this to push a changed picture to R1s that already have the old one. */
-    const val VERSION = 2
+    const val VERSION = 3
     private const val KEY = "lock_wallpaper_version"
     private const val TAG = "ribbitos"
 

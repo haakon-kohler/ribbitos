@@ -10,11 +10,18 @@ import android.widget.TextView
 class ChatView(private val column: LinearLayout, private val scroll: ScrollView) {
     private val density = column.resources.displayMetrics.density
 
+    /** Text size of every bubble, shown and to come. */
+    var textSp = TextSize.MEDIUM.chatSp
+        set(value) {
+            field = value
+            for (i in 0 until column.childCount) (column.getChildAt(i) as? TextView)?.textSize = value
+        }
+
     /** Appends a bubble for [m] and returns it, so a streaming reply can keep updating it. */
     fun add(m: Transcript.Message): TextView {
         val user = m.role == Transcript.USER
         val view = TextView(column.context).apply {
-            textSize = TEXT_SP
+            textSize = textSp
             setPadding(dp(PAD_H), dp(PAD_V), dp(PAD_H), dp(PAD_V))
             setTextIsSelectable(true)
             if (user) maxWidth = (column.resources.displayMetrics.widthPixels * USER_WIDTH).toInt()
@@ -58,7 +65,6 @@ class ChatView(private val column: LinearLayout, private val scroll: ScrollView)
     private fun dp(v: Int) = (v * density).toInt()
 
     private companion object {
-        const val TEXT_SP = 17f
         const val PAD_H = 10
         const val PAD_V = 6
         const val GAP = 6

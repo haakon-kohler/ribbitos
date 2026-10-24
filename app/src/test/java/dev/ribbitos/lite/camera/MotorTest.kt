@@ -18,15 +18,17 @@ class MotorTest {
     }
 
     @Test
-    fun aNotchIsOneStep() {
-        assertEquals(90 + Motor.STEP, Motor.next(90, 1))
-        assertEquals(90 - 2 * Motor.STEP, Motor.next(90, -2))
+    fun aNotchFlipsItAllTheWayRound() {
+        assertEquals(Motor.MIN, Motor.flipped(Motor.MAX))
+        assertEquals(Motor.MAX, Motor.flipped(Motor.MIN))
+        assertEquals("pointing up, it flips to the user", Motor.MIN, Motor.flipped(Motor.UP))
     }
 
     @Test
-    fun theWheelStopsAtTheEnds() {
-        assertEquals(Motor.MAX, Motor.next(Motor.MAX - 1, 1))
-        assertEquals(Motor.MIN, Motor.next(Motor.MIN + 1, -1))
+    fun itRestsAtTheNearestEnd() {
+        assertEquals(Motor.MAX, Motor.rest(Motor.UP))
+        assertEquals(Motor.MIN, Motor.rest(Motor.UP - 1))
+        assertEquals(Motor.MAX, Motor.rest(Motor.MAX))
     }
 
     @Test

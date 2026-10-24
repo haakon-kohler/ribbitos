@@ -3,6 +3,7 @@ package dev.ribbitos.lite
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Looper
+import android.util.TypedValue
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -366,6 +367,19 @@ class HomeActivityTest {
         launch()
         assertEquals(View.GONE, thumb.visibility)
         assertFalse(inbox.exists())
+    }
+
+    @Test
+    fun theTextSizeFromSettingsAppliesOnReturn() {
+        launch()
+        send("hi")
+        TextSize.LARGE.save(ctx)
+        controller.pause().resume()
+        val metrics = ctx.resources.displayMetrics
+        val px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, TextSize.LARGE.chatSp, metrics)
+        assertTrue(bubbles.all { it.textSize == px })
+        send("again")
+        assertEquals(px, bubbles.last().textSize)
     }
 
     @Test

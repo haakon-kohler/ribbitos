@@ -53,6 +53,9 @@ class HomeActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        val size = TextSize.load(this)
+        chat.textSp = size.chatSp
+        input.textSize = size.inputSp
         attachment.collect()
         refreshHint()
     }

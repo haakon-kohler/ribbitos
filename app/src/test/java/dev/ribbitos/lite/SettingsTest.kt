@@ -109,6 +109,19 @@ class SettingsTest {
         assertEquals(Settings(Provider.OPENCLAW, "http://gw/v1", "tok"), Settings.load(ctx))
     }
 
+    @Test
+    fun adbConfigSetsTheTextSize() {
+        ConfigReceiver().onReceive(ctx, Intent(ACTION).putExtra(TextSize.KEY, "small"))
+        assertEquals(TextSize.SMALL, TextSize.load(ctx))
+    }
+
+    @Test
+    fun anUnknownTextSizeChangesNothing() {
+        TextSize.LARGE.save(ctx)
+        ConfigReceiver().onReceive(ctx, Intent(ACTION).putExtra(TextSize.KEY, "huge"))
+        assertEquals(TextSize.LARGE, TextSize.load(ctx))
+    }
+
     private companion object {
         const val ACTION = "dev.ribbitos.lite.CONFIG"
     }

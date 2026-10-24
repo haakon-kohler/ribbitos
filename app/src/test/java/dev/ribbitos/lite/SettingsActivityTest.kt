@@ -32,6 +32,16 @@ class SettingsActivityTest {
     private fun SettingsActivity.save() = findViewById<View>(R.id.save).performClick()
 
     @Test
+    fun textSizeIsMediumAndSavesAtOnce() {
+        val a = launch()
+        val sizes = a.findViewById<RadioGroup>(R.id.text_size)
+        assertEquals(R.id.text_medium, sizes.checkedRadioButtonId)
+        sizes.check(R.id.text_large)
+        assertEquals(TextSize.LARGE, TextSize.load(ctx))
+        assertEquals(R.id.text_large, launch().findViewById<RadioGroup>(R.id.text_size).checkedRadioButtonId)
+    }
+
+    @Test
     fun demoIsPickedAndNeedsNoFields() {
         val a = launch()
         assertEquals(R.id.provider_demo, a.findViewById<RadioGroup>(R.id.provider).checkedRadioButtonId)

@@ -32,6 +32,11 @@ class SettingsActivity : Activity() {
         show(Settings.load(this, shown))
         group.check(BUTTONS.getValue(shown))
         group.setOnCheckedChangeListener { _, id -> switchTo(PROVIDERS[id] ?: shown) }
+        // Text size applies at once; Save is for the provider.
+        findViewById<RadioGroup>(R.id.text_size).apply {
+            check(SIZE_BUTTONS.getValue(TextSize.load(context)))
+            setOnCheckedChangeListener { _, id -> SIZES[id]?.save(context) }
+        }
         findViewById<View>(R.id.back).setOnClickListener { finish() }
         findViewById<View>(R.id.save).setOnClickListener { save() }
         // ribbitOS is the only app on the R1; this is the way into Android's own settings.
@@ -86,6 +91,12 @@ class SettingsActivity : Activity() {
             Provider.CLAUDE to R.id.provider_claude,
         )
         val PROVIDERS = BUTTONS.entries.associate { (p, id) -> id to p }
+        val SIZE_BUTTONS = mapOf(
+            TextSize.SMALL to R.id.text_small,
+            TextSize.MEDIUM to R.id.text_medium,
+            TextSize.LARGE to R.id.text_large,
+        )
+        val SIZES = SIZE_BUTTONS.entries.associate { (s, id) -> id to s }
         val TEXT = mapOf(
             Provider.DEMO to api(R.string.help_demo),
             Provider.OPENCLAW to Text(

@@ -71,7 +71,7 @@ data class Settings(
         const val TOKEN = "token"
         const val MODEL = "model"
 
-        private fun prefs(ctx: Context): SharedPreferences =
+        internal fun prefs(ctx: Context): SharedPreferences =
             ctx.getSharedPreferences("settings", Context.MODE_PRIVATE)
 
         private fun key(p: Provider, field: String) = "${p.id}.$field"

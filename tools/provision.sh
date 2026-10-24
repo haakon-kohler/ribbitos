@@ -31,6 +31,35 @@ say "Gesture navigation without the handle: nothing at the bottom of the screen"
 adb shell cmd overlay enable-exclusive --category com.android.internal.systemui.navbar.gestural
 adb shell cmd overlay enable org.lineageos.overlay.customization.navbar.nohint
 
+say "Android's colours from ribbitOS's amber: the keyboard, the lock screen's clock"
+amber=FFB020 # @color/accent in app/src/main/res/values/colors.xml
+theme='{"android.theme.customization.color_source":"preset","android.theme.customization.color_both":"1"'
+theme+=',"android.theme.customization.theme_style":"TONAL_SPOT"'
+theme+=",\"android.theme.customization.system_palette\":\"${amber}\",\"android.theme.customization.accent_color\":\"${amber}\"}"
+adb shell "settings put secure theme_customization_overlay_packages '${theme}'"
+
+say "No hide-keyboard button: tapping outside the text box puts the keyboard away"
+# In gesture navigation Android 14 draws a back chevron under the keyboard. Two overlays remove it:
+# the keyboard stops drawing its own button row, and the system bar's layout loses its back button.
+# Fabricating overlays needs root, which userdebug builds (the GSI) give adb.
+adb root >/dev/null 2>&1 || true
+sleep 2
+adb wait-for-device
+uid=$(adb shell id -u)
+if [[ "${uid}" == 0 ]]; then
+	adb shell cmd overlay fabricate --target android --name RibbitImeNavBar \
+		android:bool/config_imeDrawsImeNavBar 0x12 0
+	adb shell "cmd overlay fabricate --target com.android.systemui --name RibbitNavLayout \
+		com.android.systemui:string/config_navBarLayoutHandle 0x03 'space;home_handle;space'"
+	adb shell cmd overlay enable --user 0 com.android.shell:RibbitImeNavBar
+	adb shell cmd overlay enable --user 0 com.android.shell:RibbitNavLayout
+	adb unroot >/dev/null
+	sleep 2
+	adb wait-for-device
+else
+	warn "adb has no root on this build; the keyboard keeps its hide button"
+fi
+
 say "LineageOS setup marked done, so its wizard never comes back"
 adb shell settings put secure user_setup_complete 1
 adb shell settings put global device_provisioned 1
@@ -56,6 +85,7 @@ if [[ $# -eq 2 ]]; then
 	[[ -n "${RIBBIT_BASE_URL:-}" ]] && args+=(--es base_url "${RIBBIT_BASE_URL}")
 	[[ -n "${RIBBIT_TOKEN:-}" ]] && args+=(--es token "${RIBBIT_TOKEN}")
 	[[ -n "${RIBBIT_MODEL:-}" ]] && args+=(--es model "${RIBBIT_MODEL}")
+	[[ -n "${RIBBIT_TEXT_SIZE:-}" ]] && args+=(--es text_size "${RIBBIT_TEXT_SIZE}")
 	adb shell am broadcast -a "${app}.CONFIG" -n "${app}/.ConfigReceiver" "${args[@]}" >/dev/null
 	if [[ -n "${RIBBIT_PIN:-}" ]]; then
 		say "Lock screen PIN"

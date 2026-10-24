@@ -23,15 +23,18 @@ import java.io.File
 import java.io.IOException
 
 /**
- * Full-screen camera: the wheel turns the R1's camera ([Motor]), the shutter takes a photo, and the
+ * Full-screen camera: the wheel flips the R1's camera ([Motor]), the shutter takes a photo, and the
  * JPEG is left in the cache as [RESULT_FILE] for the chat to collect. Hardware-facing, so tested on
- * the R1; the rules it follows ([Photo], [Motor.next]) are unit-tested.
+ * the R1; the rules it follows ([Photo], [Motor]) are unit-tested.
  */
 class CameraActivity : Activity() {
     private val preview by lazy { findViewById<TextureView>(R.id.preview) }
     private val hint by lazy { findViewById<TextView>(R.id.camera_hint) }
     private val motor by lazy { Wiring.motorFactory() }
     private val thread = HandlerThread("ribbit-camera")
+
+    /** When the wheel last flipped the camera (uptime ms). */
+    private var flippedAt = 0L
 
     // Everything camera-side runs on this one thread.
     private val handler by lazy { Handler(thread.looper) }
@@ -71,31 +74,34 @@ class CameraActivity : Activity() {
         super.onDestroy()
     }
 
-    /** The wheel turns the camera, one [Motor.STEP] per notch. */
+    /** A wheel notch either way flips the camera; the rest of a spin arrives while it turns. */
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val steps = when (event.keyCode) {
-            KeyEvent.KEYCODE_DPAD_UP -> -1
-            KeyEvent.KEYCODE_DPAD_DOWN -> 1
+        when (event.keyCode) {
+            KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN -> Unit
             else -> return super.dispatchKeyEvent(event)
         }
-        if (event.action == KeyEvent.ACTION_DOWN) handler.post { aim(steps) }
+        if (event.action == KeyEvent.ACTION_DOWN && event.eventTime - flippedAt >= TURN_MS) {
+            flippedAt = event.eventTime
+            handler.post { aim(flip = true) }
+        }
         return true
     }
 
     private fun open(texture: SurfaceTexture) {
         handler.post {
             lens.open(texture)
-            aim(0)
+            aim(flip = false)
         }
     }
 
-    /** Turns the camera [steps] wheel notches (0: stays put) and keeps the preview upright. */
-    private fun aim(steps: Int) {
+    /** Flips the camera, or settles it at its nearest end, and keeps the preview upright. */
+    private fun aim(flip: Boolean) {
         try {
-            val angle = Motor.next(motor.angle, steps)
-            if (steps != 0) motor.turnTo(angle)
-            val flip = if (Motor.facesUser(angle)) HALF_TURN else 0f
-            runOnUiThread { preview.rotation = flip }
+            val now = motor.angle
+            val angle = if (flip) Motor.flipped(now) else Motor.rest(now)
+            if (angle != now) motor.turnTo(angle)
+            val upright = if (Motor.facesUser(angle)) HALF_TURN else 0f
+            runOnUiThread { preview.rotation = upright }
         } catch (e: IOException) {
             runOnUiThread { hint.text = getString(R.string.motor_unavailable, e.message.orEmpty()) }
         }
@@ -133,5 +139,8 @@ class CameraActivity : Activity() {
         const val RESULT_FILE = "photo.jpg"
         private const val PERMISSION_REQUEST = 2
         private const val HALF_TURN = 180f
+
+        // How long a half turn takes the motor.
+        private const val TURN_MS = 1200L
     }
 }
