@@ -1,0 +1,23 @@
+# Apps tools/provision.sh switches off, so the R1 shows nothing but ribbitOS. Reversible:
+#   adb shell pm enable <package>
+# Kept on purpose: Settings (reachable from ribbitOS settings), the keyboard, SystemUI, the phone
+# and telephony stack, emergency alerts (cellbroadcast), the file picker (documentsui), WebView.
+
+# Launchers and the first-boot wizard (ribbitOS is the home app; setup is marked done instead)
+com.android.launcher3
+org.lineageos.setupwizard
+
+# Apps a 2.9-inch AI device doesn't need
+org.lineageos.jelly
+org.lineageos.etar
+org.lineageos.eleven
+org.lineageos.recorder
+org.lineageos.aperture
+org.lineageos.glimpse
+org.lineageos.audiofx
+com.android.calculator2
+com.android.contacts
+com.android.dialer
+com.android.deskclock
+com.android.messaging
+com.android.stk

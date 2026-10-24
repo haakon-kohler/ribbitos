@@ -1,6 +1,7 @@
 package dev.ribbitos.lite
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
@@ -33,6 +34,10 @@ class SettingsActivity : Activity() {
         group.setOnCheckedChangeListener { _, id -> switchTo(PROVIDERS[id] ?: shown) }
         findViewById<View>(R.id.back).setOnClickListener { finish() }
         findViewById<View>(R.id.save).setOnClickListener { save() }
+        // ribbitOS is the only app on the R1; this is the way into Android's own settings.
+        findViewById<View>(R.id.android_settings).setOnClickListener {
+            startActivity(Intent(android.provider.Settings.ACTION_SETTINGS))
+        }
     }
 
     private fun switchTo(p: Provider) {

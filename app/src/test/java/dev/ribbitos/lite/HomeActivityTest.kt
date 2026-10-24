@@ -224,6 +224,62 @@ class HomeActivityTest {
     }
 
     @Test
+    fun tappingTheConversationPutsTheKeyboardAway() {
+        launch()
+        val imm = shadowOf(activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java))
+        val field = activity.findViewById<EditText>(R.id.input)
+        field.requestFocus()
+        activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java)
+            .showSoftInput(activity.findViewById<EditText>(R.id.input), 0)
+        val now = android.os.SystemClock.uptimeMillis()
+        activity.dispatchTouchEvent(
+            android.view.MotionEvent.obtain(now, now, android.view.MotionEvent.ACTION_DOWN, 1f, 1f, 0)
+        )
+        assertFalse(imm.isSoftInputVisible)
+        assertFalse(field.hasFocus())
+    }
+
+    @Test
+    fun tappingTheMessageRowKeepsTheKeyboard() {
+        launch()
+        val imm = shadowOf(activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java))
+        activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java)
+            .showSoftInput(activity.findViewById<EditText>(R.id.input), 0)
+        val r = android.graphics.Rect()
+        activity.findViewById<View>(R.id.composer).getGlobalVisibleRect(r)
+        val now = android.os.SystemClock.uptimeMillis()
+        val e = android.view.MotionEvent.obtain(
+            now,
+            now,
+            android.view.MotionEvent.ACTION_DOWN,
+            r.exactCenterX(),
+            r.exactCenterY(),
+            0
+        )
+        activity.dispatchTouchEvent(e)
+        assertTrue(imm.isSoftInputVisible)
+    }
+
+    @Test
+    fun theKeyboardShowsNoMicKeyOfItsOwn() {
+        launch()
+        // ribbitOS's own mic does voice typing; the AOSP keyboard hides its key for these options.
+        val options = activity.findViewById<EditText>(R.id.input).privateImeOptions.orEmpty()
+        assertTrue(options.contains("com.android.inputmethod.latin.noMicrophoneKey"))
+        assertTrue(options.split(',').contains("nm"))
+    }
+
+    @Test
+    fun theWheelPutsTheKeyboardAway() {
+        launch()
+        val imm = shadowOf(activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java))
+        activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java)
+            .showSoftInput(activity.findViewById<EditText>(R.id.input), 0)
+        activity.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN))
+        assertFalse(imm.isSoftInputVisible)
+    }
+
+    @Test
     fun scrollWheelScrollsTheConversation() {
         launch()
         assertTrue(activity.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN)))

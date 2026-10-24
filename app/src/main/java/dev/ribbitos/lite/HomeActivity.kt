@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.InputFilter
 import android.text.InputType
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
@@ -24,6 +25,8 @@ class HomeActivity : Activity() {
 
     private val voice by lazy { VoiceInput(this, input, findViewById(R.id.mic), ::runOnUiThread) }
 
+    private val settingsScreen by lazy { Intent(this, SettingsActivity::class.java) }
+
     /** The turn in flight; null when idle. */
     private var turn: Turn? = null
 
@@ -39,7 +42,7 @@ class HomeActivity : Activity() {
         input.setOnEditorActionListener { _, id, _ -> (id == EditorInfo.IME_ACTION_SEND).also { if (it) submit() } }
         send.setOnClickListener { if (turn != null) turn?.stop() else submit() }
         findViewById<View>(R.id.new_chat).setOnClickListener { newChat() }
-        findViewById<View>(R.id.settings).setOnClickListener { openSettings() }
+        findViewById<View>(R.id.settings).setOnClickListener { startActivity(settingsScreen) }
         voice.attach()
     }
 
@@ -54,6 +57,14 @@ class HomeActivity : Activity() {
         super.onDestroy()
     }
 
+    /** Touching anywhere outside the message row puts the keyboard away (there's no back button). */
+    override fun dispatchTouchEvent(e: MotionEvent): Boolean {
+        if (e.actionMasked == MotionEvent.ACTION_DOWN && !Keyboard.inside(findViewById(R.id.composer), e)) {
+            Keyboard.hide(input)
+        }
+        return super.dispatchTouchEvent(e)
+    }
+
     /** The R1's scroll wheel sends DPAD up/down: it always scrolls the conversation. */
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         val steps = when (event.keyCode) {
@@ -61,7 +72,10 @@ class HomeActivity : Activity() {
             KeyEvent.KEYCODE_DPAD_DOWN -> 1
             else -> return super.dispatchKeyEvent(event)
         }
-        if (event.action == KeyEvent.ACTION_DOWN) chat.scrollBy(steps)
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            Keyboard.hide(input)
+            chat.scrollBy(steps)
+        }
         return true
     }
 
@@ -70,7 +84,7 @@ class HomeActivity : Activity() {
         val settings = Settings.load(this)
         when {
             text.isEmpty() || turn != null -> return
-            !settings.configured -> openSettings()
+            !settings.configured -> startActivity(settingsScreen)
             else -> {
                 val earlier = transcript.messages.toList()
                 start(Turn(Wiring.backendFactory(settings), text, transcript.conversation, earlier), text)
@@ -98,8 +112,6 @@ class HomeActivity : Activity() {
         chat.clear()
         refreshHint()
     }
-
-    private fun openSettings() = startActivity(Intent(this, SettingsActivity::class.java))
 
     private fun setBusy(busy: Boolean) {
         send.setImageResource(if (busy) R.drawable.ic_stop else R.drawable.ic_send)

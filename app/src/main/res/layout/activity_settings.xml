@@ -97,6 +97,17 @@
                 android:text="@string/save"
                 android:textColor="@color/bg" />
 
+            <Button
+                android:id="@+id/android_settings"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/android_settings"
+                android:textAllCaps="false"
+                android:textColor="@color/dim"
+                android:textSize="13sp" />
+
             <TextView
                 android:id="@+id/help"
                 android:layout_width="match_parent"

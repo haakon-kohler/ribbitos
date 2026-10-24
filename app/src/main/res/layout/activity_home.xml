@@ -62,6 +62,7 @@
     </ScrollView>
 
     <LinearLayout
+        android:id="@+id/composer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="bottom"
@@ -86,6 +87,7 @@
             android:imeOptions="actionSend"
             android:importantForAutofill="no"
             android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
+            android:privateImeOptions="nm,com.android.inputmethod.latin.noMicrophoneKey"
             android:maxLines="4"
             android:minHeight="40dp"
             android:paddingHorizontal="10dp"

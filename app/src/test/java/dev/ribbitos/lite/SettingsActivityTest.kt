@@ -124,6 +124,16 @@ class SettingsActivityTest {
     }
 
     @Test
+    fun androidSettingsAreOneTapAway() {
+        val a = launch()
+        a.findViewById<View>(R.id.android_settings).performClick()
+        assertEquals(
+            android.provider.Settings.ACTION_SETTINGS,
+            org.robolectric.Shadows.shadowOf(a).nextStartedActivity.action,
+        )
+    }
+
+    @Test
     fun backLeavesWithoutSaving() {
         val a = launch()
         a.pick(R.id.provider_claude)

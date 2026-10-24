@@ -14,6 +14,7 @@
     <string name="hint_empty">Type a message to start.</string>
     <string name="hint_unconfigured">Not set up yet: open settings to add a key or a gateway.</string>
     <string name="back">‹ Back</string>
+    <string name="android_settings">Android settings (Wi-Fi, sound, display) ›</string>
     <string name="provider">Talk to</string>
     <string name="provider_demo">Demo</string>
     <string name="provider_openclaw">OpenClaw</string>

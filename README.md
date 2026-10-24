@@ -36,13 +36,14 @@ warranty, and a bad flash can brick it.
 3. Get into fastboot ([docs/FASTBOOT.md](docs/FASTBOOT.md)), then `fastboot flashing unlock`.
 4. Flash LineageOS 21 ([Andy Yan's](https://sourceforge.net/projects/andyyan-gsi/files/lineage-21-pre-qpr2-td/)
    `arm64_bvN` GSI): `tools/flash-gsi.sh <gsi.img> <unzipped stock rabbitOS v0.8.293>`.
-5. Install ribbitOS from the [latest release](../../releases), make it the home app, and pick who
-   answers:
+5. In LineageOS's first-boot setup, turn on **Settings → System → Developer options → USB
+   debugging** (tap *About phone → Build number* 7 times first). That is the only time you use
+   Android's own setup.
+6. Set the R1 up as ribbitOS from your computer (installs the app as the home screen, hides the
+   navigation bar and Android's lock screen, marks setup done so it never returns, and switches off
+   the other apps; everything it changes is listed in the script):
    ```sh
-   adb install ribbitos-lite.apk
-   adb shell cmd package set-home-activity dev.ribbitos.lite/.HomeActivity
-   adb shell am broadcast -a dev.ribbitos.lite.CONFIG -n dev.ribbitos.lite/.ConfigReceiver \
-     --es provider claude --es token <your API key>     # or openai, or openclaw + --es base_url
+   tools/provision.sh ribbitos-lite.apk my-r1.env   # my-r1.env: see tools/r1.example.env
    ```
 
 ## Build
