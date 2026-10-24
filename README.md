@@ -16,15 +16,13 @@ or Claude. No OS3 account or third party cloud, and it's MIT-licensed!
 
 ## Features
 
-- **Pick who answers:** OpenClaw (self-hosted agent), OpenAI (or any server that speaks its Chat
+- **Model-agnostic:** OpenClaw (self-hosted agent), OpenAI (or any server that speaks its Chat
   Completions API), Claude, or a built-in demo that needs no server at all.
-- **Made for a 2.9-inch screen:** one conversation, replies stream in as they're written, a stop
+- **Customized for smaller sreen:** one conversation, replies stream in as they're written, a stop
   button, the scroll wheel scrolls, full screen with nothing else in the way.
-- **Your keys stay on your R1.** Set them on the device, or push them from a computer over USB so
+- **Keys Kept local** Set them on the device, or push them from a computer over USB so
   nobody types an API key on a tiny keyboard.
-- **Easy to extend:** one small `Backend` interface; adding a provider doesn't touch the screens.
-- **Built strictly:** NASA "Power of Ten" rules, every lint check on with zero warnings, 150+ tests,
-  all enforced in CI ([docs/RULES.md](docs/RULES.md)).
+- **Easy extensibility** one small `Backend` interface. Adding a provider doesn't touch the screens.
 
 ## RibbitOS Lite vs. RibbitOS
 
