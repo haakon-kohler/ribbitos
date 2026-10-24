@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ribbitOS's picture on Android's lock screen (LockWallpaper.kt). To change the lock screen's
+     look, change this file: any drawable works. Android draws its date and clock on top. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <color android:color="@color/bg" />
+    </item>
+    <!-- Top right, beside Android's date: its big clock fills the middle of the screen. -->
+    <item
+        android:width="72dp"
+        android:height="72dp"
+        android:top="48dp"
+        android:right="16dp"
+        android:drawable="@drawable/ic_launcher_foreground"
+        android:gravity="top|right" />
+</layer-list>

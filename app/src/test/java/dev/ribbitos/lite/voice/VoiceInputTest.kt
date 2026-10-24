@@ -8,6 +8,7 @@ import android.view.MotionEvent
 import android.widget.EditText
 import android.widget.ImageButton
 import dev.ribbitos.lite.HomeActivity
+import dev.ribbitos.lite.LockWallpaper
 import dev.ribbitos.lite.R
 import dev.ribbitos.lite.Wiring
 import org.junit.After
@@ -31,6 +32,7 @@ import java.util.concurrent.Executor
 class VoiceInputTest {
     private val app: Application get() = RuntimeEnvironment.getApplication()
     private val saved = Triple(Wiring.executor, Wiring.recorderFactory, Wiring.transcriberFactory)
+    private val savedWallpaper = LockWallpaper.setter
     private var recorded = FloatArray(Pcm.SAMPLE_RATE)
     private var startFails = false
     private var heard: () -> String = { "hello there" }
@@ -44,6 +46,8 @@ class VoiceInputTest {
 
     @Before
     fun wire() {
+        // Robolectric 4.17's WallpaperManager can't load on SDK 34; LockWallpaperTest covers it.
+        LockWallpaper.setter = { _, _ -> }
         Wiring.executor = Executor { it.run() }
         Wiring.recorderFactory = {
             object : Recorder {
@@ -71,6 +75,7 @@ class VoiceInputTest {
 
     @After
     fun unwire() {
+        LockWallpaper.setter = savedWallpaper
         Wiring.executor = saved.first
         Wiring.recorderFactory = saved.second
         Wiring.transcriberFactory = saved.third

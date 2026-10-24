@@ -33,8 +33,11 @@ say "LineageOS setup marked done, so its wizard never comes back"
 adb shell settings put secure user_setup_complete 1
 adb shell settings put global device_provisioned 1
 
-say "No Android lock screen on wake: ribbitOS opens straight away (its own lock screen comes later)"
-adb shell locksettings set-disabled true >/dev/null
+say "Android's lock screen, simplified: ribbitOS's frog picture, the clock, no notifications"
+# The picture is res/drawable/lock_screen.xml, set by the app (LockWallpaper.kt). A swipe unlocks,
+# unless the settings file sets RIBBIT_PIN.
+adb shell locksettings set-disabled false >/dev/null
+adb shell settings put secure lock_screen_show_notifications 0
 
 say "Only ribbitOS: switching off the apps in tools/debloat.txt"
 while read -r pkg; do
@@ -52,6 +55,11 @@ if [[ $# -eq 2 ]]; then
 	[[ -n "${RIBBIT_TOKEN:-}" ]] && args+=(--es token "${RIBBIT_TOKEN}")
 	[[ -n "${RIBBIT_MODEL:-}" ]] && args+=(--es model "${RIBBIT_MODEL}")
 	adb shell am broadcast -a "${app}.CONFIG" -n "${app}/.ConfigReceiver" "${args[@]}" >/dev/null
+	if [[ -n "${RIBBIT_PIN:-}" ]]; then
+		say "Lock screen PIN"
+		adb shell locksettings set-pin "${RIBBIT_PIN}" >/dev/null ||
+			warn "A PIN is already set; change it in Android settings (Security)"
+	fi
 fi
 
 adb shell am start -n "${app}/.HomeActivity" >/dev/null

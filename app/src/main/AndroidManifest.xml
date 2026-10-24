@@ -4,6 +4,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Voice typing: audio is transcribed on the R1 itself and never leaves it. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- The frog on Android's lock screen (LockWallpaper.kt). -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
 
     <!-- Cleartext is for a self-hosted OpenClaw gateway on the LAN (http://host:18789). -->
     <application

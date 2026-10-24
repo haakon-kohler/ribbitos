@@ -34,6 +34,7 @@ class HomeActivity : Activity() {
         super.onCreate(state)
         setContentView(R.layout.activity_home)
         Screen.immersive(this)
+        LockWallpaper.applyOnce(this)
         transcript.messages.forEach { chat.add(it) }
 
         // Wraps like a multi-line field, but the keyboard's action key sends.

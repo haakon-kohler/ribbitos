@@ -30,6 +30,7 @@ class HomeActivityTest {
     private val ctx: Context get() = RuntimeEnvironment.getApplication()
     private val savedFactory = Wiring.backendFactory
     private val savedExecutor = Wiring.executor
+    private val savedWallpaper = LockWallpaper.setter
     private var backend = FakeBackend { _, onDelta ->
         onDelta("Hel")
         onDelta("lo")
@@ -48,12 +49,15 @@ class HomeActivityTest {
 
     @Before
     fun wire() {
+        // Robolectric 4.17's WallpaperManager can't load on SDK 34; LockWallpaperTest covers it.
+        LockWallpaper.setter = { _, _ -> }
         Wiring.backendFactory = { backend }
         Wiring.executor = Executor { it.run() }
     }
 
     @After
     fun unwire() {
+        LockWallpaper.setter = savedWallpaper
         Wiring.backendFactory = savedFactory
         Wiring.executor = savedExecutor
     }
