@@ -66,13 +66,13 @@ def sums(files: list[Path]) -> str:
 def ci_build(into: Path) -> tuple[str, int, str, Path]:
     """Download CI's build of main's tip; return its commit, version code, version name and APK."""
     commit = gh("api", f"repos/{{owner}}/{{repo}}/commits/{BRANCH}", "--jq", ".sha")
-    run_id = gh(
-        *("run", "list", "--workflow", "ci.yml", "--branch", BRANCH, "--event", "push", "--commit", commit),
-        *("--status", "success", "--limit", "1", "--json", "databaseId", "--jq", ".[].databaseId"),
+    runs = gh(
+        *("run", "list", "--workflow", "ci.yml", "--branch", BRANCH, "--commit", commit, "--status", "success"),
+        *("--json", "databaseId,event", "--jq", '.[] | select(.event != "pull_request") | .databaseId'),
     )
-    if not run_id:
-        sys.exit(f"CI hasn't passed on {BRANCH}'s tip ({commit}) yet")
-    gh("run", "download", run_id, "--name", ARTIFACT, "--dir", str(into))
+    if not runs:
+        sys.exit(f"CI hasn't passed on {BRANCH}'s tip ({commit}) yet; for a docs-only commit: gh workflow run ci.yml")
+    gh("run", "download", runs.split()[0], "--name", ARTIFACT, "--dir", str(into))
     (element,) = json.loads((into / "output-metadata.json").read_text())["elements"]
     return commit, int(element["versionCode"]), str(element["versionName"]), into / element["outputFile"]
 

@@ -1,7 +1,7 @@
 # Development rules
 
 The rules ribbitOS is built by, written down here and enforced by the build rather than remembered.
-Outside contributions open with a later release. Every rule a machine can check runs in CI (`.github/workflows/ci.yml`) on every branch push.
+Outside contributions open with a later release. Every rule a machine can check runs in CI (`.github/workflows/ci.yml`) on every branch push that changes more than docs.
 
 ## Before you push
 

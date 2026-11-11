@@ -122,6 +122,11 @@ android {
     }
 }
 
+androidComponents {
+    // Unit tests run on debug only: release compiles the same sources, and R8 never touches them.
+    beforeVariants(selector().withBuildType("release")) { it.enableUnitTest = false }
+}
+
 detekt {
     buildUponDefaultConfig = true
     allRules = true
