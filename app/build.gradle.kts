@@ -8,12 +8,14 @@ plugins {
     id("org.jetbrains.kotlinx.kover")
 }
 
-// Voice typing's Whisper model (whisper.cpp ggml format), from the original repository. The build
-// downloads it once and refuses it unless its SHA-256 matches; it is never committed. To change
-// models, change these two lines (sizes, speeds and the reasons for this pick: docs/VOICE.md).
+// Voice typing's Whisper model (whisper.cpp ggml format), from a fixed revision of the original
+// repository. The build downloads it once and refuses it unless its SHA-256 matches; it is never
+// committed. To change models, change WHISPER_MODEL and WHISPER_SHA256 (sizes, speeds and the
+// reasons for this pick: docs/VOICE.md).
 val WHISPER_MODEL = "ggml-tiny.en-q8_0.bin"
 val WHISPER_SHA256 = "5bc2b3860aa151a4c6e7bb095e1fcce7cf12c7b020ca08dcec0c6d018bb7dd94"
-val WHISPER_URL = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$WHISPER_MODEL"
+val WHISPER_REVISION = "5359861c739e955e79d9a303bcbc70fb988958b1"
+val WHISPER_URL = "https://huggingface.co/ggerganov/whisper.cpp/resolve/$WHISPER_REVISION/$WHISPER_MODEL"
 
 // Coverage gate for `koverVerify`: line and branch percentages.
 val COVERAGE_LINES = 90

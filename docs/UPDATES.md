@@ -13,7 +13,7 @@ The feed is a folder of four files, by default the latest GitHub release of this
 
 | File | What it is |
 | --- | --- |
-| `update.json` | the build's `versionCode`, `versionName`, APK file name and SHA-256 |
+| `update.json` | the build's `versionCode`, `versionName`, APK file name, SHA-256 and commit |
 | `update.json.sig` | the release key's signature over `update.json` (ECDSA P-256, SHA-256) |
 | `ribbitos-lite-<tag>.apk` | the build itself |
 | `SHA256SUMS` | checksums, for people |
@@ -45,12 +45,11 @@ You need the release key's private half at `~/.config/ribbitos/update-key.pem` (
 `$RIBBITOS_UPDATE_KEY` points). Keep a backup somewhere safe: without it, installed R1s can't be
 updated anymore and need a manual reinstall of a build carrying a new key.
 
-1. Raise `versionCode` and set `versionName` in `app/build.gradle.kts`.
-2. `./gradlew check assembleRelease`, then test the release build on an R1
-   ([RULES.md](RULES.md) rule 5).
-3. `tools/release.py v<versionName>` writes and checks `dist/v<versionName>/`.
-4. `tools/release.py v<versionName> --publish notes.md` publishes it as the latest GitHub release.
-   R1s pick it up at their next idle check.
+1. Raise `versionCode` and set `versionName` in `app/build.gradle.kts`, and push to `main`.
+2. Once CI passes, `tools/release.py v<versionName>` signs CI's build into `dist/v<versionName>/`.
+3. Test that APK on an R1 ([RULES.md](RULES.md) rule 5).
+4. `tools/release.py v<versionName> --publish notes.md` publishes it as the latest GitHub release,
+   tagged at the commit CI built. R1s pick it up at their next idle check.
 
 Pre-releases aren't "latest", so they never reach R1s on their own.
 

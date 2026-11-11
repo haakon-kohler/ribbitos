@@ -1,10 +1,11 @@
-# Every rule in docs/RULES.md that a machine can check runs here, on every push and pull request.
-# Actions are pinned to full commit SHAs (tags can be moved), each a release at least two weeks old
-# when pinned; the comment names the release.
+# Every rule in docs/RULES.md that a machine can check runs here, on every branch push and pull
+# request. Actions are pinned to full commit SHAs (tags can be moved), each a release at least two
+# weeks old when pinned; the comment names the release.
 name: ci
 
 on:
   push:
+    branches: ["**"] # Not tags: tools/release.py tags a commit this workflow already built.
   pull_request:
 
 permissions:
@@ -28,6 +29,13 @@ jobs:
       # without type resolution) + unit and Robolectric tests + the Kover coverage gate.
       # `assembleRelease` runs R8, which is where SDK keep-rule problems show up at build time.
       - run: ./gradlew --no-daemon check assembleRelease
+      # The only build that gets released (tools/release.py).
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/release/
+          if-no-files-found: error
       - if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

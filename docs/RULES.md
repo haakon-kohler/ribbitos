@@ -1,7 +1,7 @@
 # Development rules
 
 The rules ribbitOS is built by, written down here and enforced by the build rather than remembered.
-Outside contributions open with a later release. Every rule a machine can check runs in CI (`.github/workflows/ci.yml`) on every push.
+Outside contributions open with a later release. Every rule a machine can check runs in CI (`.github/workflows/ci.yml`) on every branch push.
 
 ## Before you push
 
@@ -40,8 +40,8 @@ ruff check tools/ && ruff format --check tools/   # the tools (ruff.toml)
 
 5. **Release builds are tested on an R1.** R8 shrinks release builds, and it can break code that
    other libraries reach by reflection (Jackson inside the Anthropic SDK did) in ways no JVM test
-   sees. Before a release, install `app/build/outputs/apk/release/app-release.apk` on an R1 and send
-   one message through each provider. An invalid key is enough: the provider's own "rejected the
+   sees. Before a release, install the APK `tools/release.py` puts in `dist/` on an R1 and send one
+   message through each provider. An invalid key is enough: the provider's own "rejected the
    key" error proves the request was built, sent and its answer parsed. Then update an R1 to it
    from a local feed (docs/UPDATES.md), and publish it with `tools/release.py`.
 
